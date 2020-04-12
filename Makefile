@@ -26,18 +26,6 @@ build:
 get-deps:
 	dep ensure
 
-tag: 
-	@echo "Tagging: latest ${VERSION} $(GIT_COMMIT)"
-	docker tag $(IMAGE_NAME):local $(IMAGE_NAME):$(GIT_COMMIT)
-	docker tag $(IMAGE_NAME):local $(IMAGE_NAME):${VERSION}
-	docker tag $(IMAGE_NAME):local $(IMAGE_NAME):latest
-
-push: tag
-	@echo "Pushing docker image to registry: latest ${VERSION} $(GIT_COMMIT)"
-	docker push $(IMAGE_NAME):$(GIT_COMMIT)
-	docker push $(IMAGE_NAME):${VERSION}
-	docker push $(IMAGE_NAME):latest
-
 clean:
 	@test ! -e bin/${BIN_NAME} || rm bin/${BIN_NAME}
 
