@@ -4,6 +4,7 @@ package digitalocean
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"github.com/Midnight-Conqueror/cogo/config"
 	"github.com/Midnight-Conqueror/cogo/utils"
@@ -75,7 +76,7 @@ func CreateDroplet() (*godo.Droplet, error) {
 		return nil, err
 	}
 
-	shouldCreate, err := confirmCreate()
+	shouldCreate, err := confirmCreate("Are you sure? (y/n)")
 
 	if err != nil {
 		return nil, err
@@ -100,6 +101,119 @@ func CreateDroplet() (*godo.Droplet, error) {
 	newDroplet, _, createDropletError := client.Droplets.Create(ctx, createRequest)
 
 	return newDroplet, createDropletError
+}
+
+// DestroyDroplet will show the user a list of servers
+// upon selecting the server you will have to confirm with y/n
+// Once confirmed the user will then have to type in the name of the droplet to make sure they are aware of what they're deleting
+// Once entered they will have to do another y/n to confirm that they definitely want it gone
+// The deleted droplets name is returned
+func DestroyDroplet() (*utils.SelectItem, error) {
+	digitalOceanToken, tokenError := getToken()
+
+	if tokenError != nil {
+		return nil, tokenError
+	}
+
+	client := godo.NewFromToken(digitalOceanToken)
+
+	ctx := context.TODO()
+
+	droplets, err := dropletList(ctx, client)
+
+	if err != nil {
+		return nil, err
+	}
+
+	selectItemDroplets := utils.ParseDropletListResults(droplets)
+
+	selectDropletPrompt := utils.CreateCustomSelectPrompt("Select Droplet to Delete", selectItemDroplets)
+
+	selectedDropletIndex, _, err := selectDropletPrompt.Run()
+
+	if err != nil {
+		return nil, err
+	}
+
+	selectedDroplet := selectItemDroplets[selectedDropletIndex]
+
+	if err != nil {
+		return nil, err
+	}
+
+	selectedDropletID, err := strconv.Atoi(selectedDroplet.Value)
+
+	if err != nil {
+		return nil, err
+	}
+
+	areYouSure, err := confirmCreate("Are you sure? (y/n)")
+
+	if err != nil {
+		fmt.Printf("Something went wrong asking you to confirm: %s", err)
+		return nil, err
+	}
+
+	if !areYouSure {
+		fmt.Println("You decided not to delete this droplet")
+		return nil, err
+	}
+
+	validateDropletNameDeletion := func(input string) error {
+		if len(input) <= 0 {
+			return errors.New("Must enter the name of the droplet you want to delete")
+		}
+		if input != selectedDroplet.Name {
+			return errors.New("Must enter the exact same name to delete")
+		}
+		return nil
+	}
+
+	promptReEnterDropletName := promptui.Prompt{
+		Label:    "Re enter Droplet name to confirm delete (WARNING DROPLET WILL BE DELETED FOREVER)",
+		Validate: validateDropletNameDeletion,
+	}
+
+	enteredDropletName, err := promptReEnterDropletName.Run()
+
+	if err != nil {
+		fmt.Printf("Droplet name prompt failed %v\n", err)
+		return nil, err
+	}
+
+	fullDropletInfo := droplets[selectedDropletIndex]
+	selectedDropletIP, err := fullDropletInfo.PublicIPv4()
+
+	if err != nil {
+		fmt.Printf("Something went wrong getting ip of droplet to delete: %s", err)
+		return nil, err
+	}
+
+	color.Cyan("Name: %s\nSize: %s\nRegion: %s\nImage: %s\nIP: %s", fullDropletInfo.Name, fullDropletInfo.Size.Slug, fullDropletInfo.Region.Name, fullDropletInfo.Image.Name, selectedDropletIP)
+
+	areYouReallyReallySure, err := confirmCreate("Are you really really sure you want to delete this droplet? (y/n)")
+
+	if err != nil {
+		fmt.Printf("Something went wrong asking you to confirm deletion: %s", err)
+		return nil, err
+	}
+
+	if !areYouReallyReallySure {
+		fmt.Println("You decided not to delete this droplet")
+		return nil, err
+	}
+
+	if _, err := client.Droplets.Delete(ctx, selectedDropletID); err != nil {
+		fmt.Printf("Something went wrong deleting droplet: %s", err)
+		return nil, err
+	}
+
+	if enteredDropletName != selectedDroplet.Name {
+		fmt.Printf("You entered the droplet name incorrectly")
+		return nil, errors.New("Incorrect droplet name")
+	}
+
+	return &selectedDroplet, nil
 }
 
 // getToken first will check if the digitaloceantoken is present in the config file
@@ -398,6 +512,8 @@ func getSelectedSSHKeyID(ctx context.Context, client *godo.Client) (int, error) 
 func getSelectedRegionSlug(ctx context.Context, client *godo.Client) (string, error) {
 	regionList, regionListError := regionList(ctx, client)
 
+	fmt.Println(regionList)
+
 	if regionListError != nil {
 		fmt.Printf("Something bad happened getting region list: %s\n\n", regionListError)
 		return "", regionListError
@@ -457,9 +573,9 @@ func getSelectedImageSlug(ctx context.Context, client *godo.Client) (string, err
 
 // confirmCreate asks the user if they are sure they want to create the droplet
 // answering with a "y" will return true
-func confirmCreate() (bool, error) {
+func confirmCreate(label string) (bool, error) {
 	promptAreYouSure := promptui.Prompt{
-		Label:    "Are you sure? (y/n)",
+		Label:    label,
 		Validate: utils.ValidateAreYouSure,
 	}
 

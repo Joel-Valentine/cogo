@@ -67,7 +67,7 @@ func ValidateAreYouSure(input string) error {
 	return errors.New("Answer must be y/n")
 }
 
-// ValidateDropletName will check whether they entered yes
+// ValidateDropletName will check whether they entered a valid droplet name
 func ValidateDropletName(input string) error {
 	if len(input) <= 0 {
 		return errors.New("Must have a name")
@@ -116,6 +116,19 @@ func ParseSizeListResults(list []godo.Size) []SelectItem {
 
 // ParseSSHKeyListResults will return a list of DigitalOcean ssh keys as SelectItems to be used for promptui
 func ParseSSHKeyListResults(list []godo.Key) []SelectItem {
+	selectList := []SelectItem{}
+
+	for _, element := range list {
+		id := strconv.Itoa(element.ID)
+		listItem := SelectItem{Name: element.Name, Value: id}
+		selectList = append(selectList, listItem)
+	}
+
+	return selectList
+}
+
+// ParseDropletListResults will return a list of DigitalOcean ssh keys as SelectItems to be used for promptui
+func ParseDropletListResults(list []godo.Droplet) []SelectItem {
 	selectList := []SelectItem{}
 
 	for _, element := range list {

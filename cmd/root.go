@@ -29,6 +29,7 @@ func Execute() {
 func init() {
 	rootCmd.AddCommand(create)
 	rootCmd.AddCommand(list)
+	rootCmd.AddCommand(destroy)
 	cobra.OnInitialize()
 }
 
@@ -41,7 +42,8 @@ var create = &cobra.Command{
 		selectedProvider, err := utils.AskForProvider()
 
 		if err != nil {
-			fmt.Print("Something went wrong asking for selected provider")
+			color.Yellow("Something went wrong asking for selected provider\n")
+			color.Cyan("List your droplets in a couple of minutes to see the IP\n")
 			return
 		}
 
@@ -49,16 +51,17 @@ var create = &cobra.Command{
 			createdDroplet, createDropletError := do.CreateDroplet()
 
 			if createDropletError != nil {
-				fmt.Printf("Creation of droplet failed: %s\n\n", createDropletError)
-			}
-
-			if createdDroplet == nil {
-				color.Cyan("Aborted, droplet was not created")
+				color.Cyan("Aborted, droplet was not created\n")
 				return
 			}
 
-			color.Green("Droplet %s was created!", createdDroplet.Name)
-			color.Cyan("List your droplets in a couple of minutes to see the IP")
+			if createdDroplet == nil {
+				color.Cyan("Aborted, droplet was not created\n")
+				return
+			}
+
+			color.Green("Droplet [%s] was created!", createdDroplet.Name)
+			color.Cyan("List your droplets in a couple of minutes to see the IP\n")
 		}
 	},
 }
@@ -71,12 +74,47 @@ var list = &cobra.Command{
 		selectedProvider, err := utils.AskForProvider()
 
 		if err != nil {
-			fmt.Print("Something went wrong asking for selected provider")
+			color.Yellow("Something went wrong asking for selected provider\n")
 			return
 		}
 
 		if selectedProvider == "DO" {
 			do.DisplayDropletList()
+		}
+	},
+}
+
+var destroy = &cobra.Command{
+	Use:   "destroy",
+	Short: "Destroys servers created in selected provider",
+	Long: `Will show a list of servers that you currently have in a selected provider, 
+	with the ability to select one and delete/destroy it.
+	
+	Be very careful here. There will be two warnings to make sure that you don't accidentally delete
+	a crucial droplet`,
+	Run: func(cmd *cobra.Command, args []string) {
+		selectedProvider, err := utils.AskForProvider()
+
+		if err != nil {
+			color.Yellow("Something went wrong asking for selected provider\n")
+			color.Cyan("Aborted, Droplet was not destroyed:\n")
+			return
+		}
+
+		if selectedProvider == "DO" {
+			destroyedDroplet, err := do.DestroyDroplet()
+
+			if err != nil {
+				color.Cyan("Aborted, Droplet was not destroyed\n")
+				return
+			}
+
+			if destroyedDroplet == nil {
+				color.Cyan("Aborted, droplet was not destroyed\n")
+				return
+			}
+
+			color.Green("Droplet [%s] has been destroyed\n", destroyedDroplet.Name)
 		}
 	},
 }
