@@ -4,13 +4,12 @@ This repository's issues are reserved for feature requests and bug reports.
 
   - [ ] bug report
   - [ ] feature request
-  - [ ] support request => Please do not submit support request here, see note at the top of this template.
 
 - **What is the current behavior? (bug)**
 
-* **If the current behavior is a bug, please provide the steps to reproduce and if possible a minimal demo of the problem**
-
 - **What is the expected behavior?**
+
+* **reproduce and if possible a minimal demo of the problem (bug)**
 
 * **What is the motivation / use case for changing the behavior?**
 
