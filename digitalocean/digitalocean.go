@@ -243,7 +243,7 @@ func getToken() (string, error) {
 		}
 
 		saveTokenPrompt := promptui.Prompt{
-			Label:    "Do you want to save this to ./.cogo_config.json? (y/n)",
+			Label:    "Do you want to save this to ~/.config/cogo? (y/n)",
 			Validate: utils.ValidateAreYouSure,
 		}
 

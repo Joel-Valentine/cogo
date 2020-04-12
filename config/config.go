@@ -59,8 +59,10 @@ func init() {
 
 func readViperConfig() *viper.Viper {
 	v := viper.New()
-	v.SetConfigName(".cogo_config")
+	v.SetConfigName(".cogo")
 	v.SetConfigType("json")
+	v.AddConfigPath("$HOME")
+	v.AddConfigPath("$HOME/.config/")
 	v.AddConfigPath(".")
 	v.AutomaticEnv()
 
@@ -72,8 +74,8 @@ func readViperConfig() *viper.Viper {
 // SaveConfigFile will save a config file to be used again later
 func SaveConfigFile(token string) {
 	defaultConfig.Set("digitalOceanToken", token)
-	if err := defaultConfig.WriteConfigAs(".cogo_config.json"); err != nil {
-		fmt.Printf("UH OH %s", err)
+	if err := defaultConfig.WriteConfigAs("~/.config/cogo"); err != nil {
+		fmt.Printf("Failed to write config file %s", err)
 		return
 	}
 }
