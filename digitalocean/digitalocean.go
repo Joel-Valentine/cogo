@@ -232,6 +232,7 @@ func getToken() (string, error) {
 	if err != nil && err.Code == 01 {
 		promptDigitalOceanToken := promptui.Prompt{
 			Label: "Enter your Digital Ocean API Token",
+			Mask:  '*',
 		}
 
 		token, err := promptDigitalOceanToken.Run()
