@@ -52,6 +52,18 @@ list will list servers created on that provider printing the name and IP
 
 ```bash
 cogo list
+
+
+Your droplets:
+
+0  Name: blog
+   IP: xxx.xxx.xxx.xxx
+
+1  Name: backend
+   IP: xxx.xxx.xxx.xxx
+
+2  Name: frontend
+   IP: xxx.xxx.xxx.xxx
 ```
 
 ### destroy
