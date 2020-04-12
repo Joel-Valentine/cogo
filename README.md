@@ -2,6 +2,8 @@
 
 Cogo is an easy way to interact with cloud providers. It currently allows you to create a droplet on DO and list your droplets
 
+![Cogo example gif](https://i.imgur.com/jrxccl7.gif)
+
 ## Supported providers
 
 - DigitalOcean
