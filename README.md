@@ -31,7 +31,7 @@ cogo create
 list will list servers created on that provider printing the name and IP
 
 ```bash
-cogo create
+cogo list
 ```
 
 ## Installing from source
@@ -51,6 +51,6 @@ $ ./bin/cogo
 
 ## Contributing
 
-Please add an issue if you want to fix a bug or add a feature this will help us initially talk through the issue. Everyone is welcome to contribute to this topic.
+Please add an issue if you want to fix a bug or add a feature allowing us to initially talk through the request. Everyone is welcome to contribute to this project if they have a valid feature/bug.
 
-I am still learning Go at the moment so this has been my first project using the language so don't feel like you need to be a wizard in Go to contribute
+I am still learning Go at the moment so don't feel like you need to be a wizard to contribute
