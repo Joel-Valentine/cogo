@@ -27,6 +27,15 @@ type Provider interface {
 	IsSet(key string) bool
 }
 
+// Configurations is the structure of the config file
+type Configurations struct {
+	digitalOceanAPIToken string
+}
+
+// PossibleSaveLocations is a list of all locations that is currently supported
+// Not entirely sure this is what I want.. I think I want to use an enum
+var PossibleSaveLocations = []string{"$HOME/.cogo", "$HOME/.config/.cogo", "./.cogo"}
+
 // AppError is The default config error
 type AppError struct {
 	Error   error
@@ -58,6 +67,7 @@ func init() {
 }
 
 func readViperConfig() *viper.Viper {
+	fmt.Printf("%s", PossibleSaveLocations)
 	v := viper.New()
 	v.SetConfigName(".cogo")
 	v.SetConfigType("json")
@@ -69,13 +79,4 @@ func readViperConfig() *viper.Viper {
 	// global defaults
 
 	return v
-}
-
-// SaveConfigFile will save a config file to be used again later
-func SaveConfigFile(token string) {
-	defaultConfig.Set("digitalOceanToken", token)
-	if err := defaultConfig.WriteConfigAs("~/.config/cogo"); err != nil {
-		fmt.Printf("Failed to write config file %s", err)
-		return
-	}
 }

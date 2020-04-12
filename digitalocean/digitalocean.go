@@ -12,6 +12,7 @@ import (
 	"github.com/fatih/color"
 	"github.com/manifoldco/promptui"
 	"strconv"
+	"strings"
 )
 
 // CreateDroplet will ask the user a series of questions to determine what kind of
@@ -235,23 +236,14 @@ func getToken() (string, error) {
 
 		token, err := promptDigitalOceanToken.Run()
 
-		digitalOceanToken = token
-
 		if err != nil {
 			fmt.Printf("Token prompt failed %v\n", err)
 			return "", err
 		}
 
-		saveTokenPrompt := promptui.Prompt{
-			Label:    "Do you want to save this to ~/.config/cogo? (y/n)",
-			Validate: utils.ValidateAreYouSure,
-		}
+		digitalOceanToken = token
 
-		saveToken, err := saveTokenPrompt.Run()
-
-		if saveToken == "y" {
-			config.SaveConfigFile(digitalOceanToken)
-		}
+		color.Cyan("Think about saving this to prevent re entering later. Valid locations are: %v", strings.Join(config.PossibleSaveLocations, ", "))
 
 		if err != nil {
 			fmt.Printf("Save Token prompt failed %v\n", err)
