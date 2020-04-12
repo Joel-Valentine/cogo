@@ -53,7 +53,7 @@ var create = &cobra.Command{
 			}
 
 			if createdDroplet == nil {
-				color.Cyan("Droplet was not created")
+				color.Cyan("Aborted, droplet was not created")
 				return
 			}
 

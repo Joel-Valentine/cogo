@@ -14,7 +14,7 @@ type SelectItem struct {
 	Value string
 }
 
-// CreateCustomSelectPrompt will create a customised select prompt to be used to ask the user a multi-select question
+// CreateCustomSelectPrompt will create a customised formatted select prompt to be used to ask the user a multi-select question
 func CreateCustomSelectPrompt(title string, completeList []SelectItem) promptui.Select {
 	selectList := completeList
 
@@ -45,7 +45,8 @@ func CreateCustomSelectPrompt(title string, completeList []SelectItem) promptui.
 	return prompt
 }
 
-// GetAnswerFromCustomPrompt will take in a select prompt (usually custom) and return the selected answer as a string
+// GetAnswerFromCustomPrompt will take in a select prompt (usually custom), a list of items
+// returns the selected answer as a string
 func GetAnswerFromCustomPrompt(prompt promptui.Select, list []SelectItem) (string, error) {
 	index, _, err := prompt.Run()
 
@@ -127,6 +128,7 @@ func ParseSSHKeyListResults(list []godo.Key) []SelectItem {
 }
 
 // AskForProvider will ask the user which provider they would like to use
+// returns the selected provider as a string
 func AskForProvider() (string, error) {
 	supportedProviders := []SelectItem{}
 	digitalOcean := SelectItem{Name: "DigitalOcean", Value: "DO"}
@@ -143,4 +145,13 @@ func AskForProvider() (string, error) {
 	selectedProvider := supportedProviders[providerIndex]
 
 	return selectedProvider.Value, nil
+}
+
+// AskAndAnswerCustomSelect will ask a custom select question and return the selected answer as a string
+func AskAndAnswerCustomSelect(title string, list []SelectItem) (string, error) {
+	prompt := CreateCustomSelectPrompt(title, list)
+
+	answer, err := GetAnswerFromCustomPrompt(prompt, list)
+
+	return answer, err
 }

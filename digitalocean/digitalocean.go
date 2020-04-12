@@ -1,3 +1,5 @@
+// Package digitalocean is used for interacting with digitalocean.
+// currently allows for creation and listing of droplets
 package digitalocean
 
 import (
@@ -11,7 +13,16 @@ import (
 	"strconv"
 )
 
-// CreateDroplet will create a droplet and return the created droplet
+// CreateDroplet will ask the user a series of questions to determine what kind of
+// droplet they would like to be create
+// 1. Asks for a digital ocean api token
+// 2. Asks what name you would like for the droplet
+// 3. Asks what Image you would like to use on the droplet (ubuntu, centos...)
+// 4. Asks what size you would like the droplet to be (1gb RAM 1 CPU..)
+// 5. Asks what region you want the droplet to be hosted in (London, Amsterdam...)
+// 6. Asks what SSH Key you wouldl like to use to access the droplet
+// 7. Asks if you are sure with a y/n answer. It will not create a droplet if you chose n
+// Finally the droplet is created and returned
 func CreateDroplet() (*godo.Droplet, error) {
 
 	digitalOceanToken, tokenError := getToken()
@@ -36,92 +47,42 @@ func CreateDroplet() (*godo.Droplet, error) {
 		return nil, promptDropletError
 	}
 
-	imageList, imageListError := ImageList(ctx, client)
-
-	if imageListError != nil {
-		fmt.Printf("Something bad happened getting image list: %s\n\n", imageListError)
-		return nil, imageListError
-	}
-
-	imagePrompt := utils.CreateCustomSelectPrompt("Image Select", imageList)
-
-	imageIndex, _, imagePromptError := imagePrompt.Run()
-
-	if imagePromptError != nil {
-		fmt.Printf("Prompt failed %v\n", imagePromptError)
-		return nil, imagePromptError
-	}
-
-	selectedImage := imageList[imageIndex]
-
-	sizeList, sizeListError := SizeList(ctx, client)
-
-	if sizeListError != nil {
-		fmt.Printf("Something bad happened getting size list: %s\n\n", sizeListError)
-		return nil, sizeListError
-	}
-
-	sizePrompt := utils.CreateCustomSelectPrompt("Size Select", sizeList)
-
-	selectedSize, err := utils.GetAnswerFromCustomPrompt(sizePrompt, sizeList)
+	selectedImage, err := getSelectedImageSlug(ctx, client)
 
 	if err != nil {
-		fmt.Printf("Failed to ask question, %s", err)
+		fmt.Printf("Failed to get image slug: %s", err)
 		return nil, err
 	}
 
-	regionList, regionListError := regionList(ctx, client)
-
-	if regionListError != nil {
-		fmt.Printf("Something bad happened getting region list: %s\n\n", regionListError)
-		return nil, regionListError
-	}
-
-	regionPrompt := utils.CreateCustomSelectPrompt("Region Select", regionList)
-
-	selectedRegion, err := utils.GetAnswerFromCustomPrompt(regionPrompt, regionList)
+	selectedSize, err := getSelectedSizeSlug(ctx, client)
 
 	if err != nil {
-		fmt.Printf("Failed to ask question: %s", err)
+		fmt.Printf("Failed to get size slug: %s", err)
 		return nil, err
 	}
 
-	keyList, sshKeyListError := SSHKeyList(ctx, client)
-
-	if sshKeyListError != nil {
-		fmt.Printf("Something bad happened getting region list: %s\n\n", sshKeyListError)
-		return nil, sshKeyListError
-	}
-
-	sshKeyPrompt := utils.CreateCustomSelectPrompt("SSH Key Select", keyList)
-
-	selectedKey, err := utils.GetAnswerFromCustomPrompt(sshKeyPrompt, keyList)
+	selectedRegion, err := getSelectedRegionSlug(ctx, client)
 
 	if err != nil {
-		fmt.Printf("Failed to ask question: %s", err)
+		fmt.Printf("Failed to get region slug: %s", err)
 		return nil, err
 	}
 
-	sshKeyID, strconvError := strconv.Atoi(selectedKey)
+	sshKeyID, err := getSelectedSSHKeyID(ctx, client)
 
-	if strconvError != nil {
-		fmt.Println("ssh key id was not an int")
-		return nil, strconvError
+	if err != nil {
+		fmt.Printf("Failed to get SSH key ID: %s", err)
+		return nil, err
 	}
 
-	promptAreYouSure := promptui.Prompt{
-		Label:    "Are you sure? (y/n)",
-		Validate: utils.ValidateAreYouSure,
+	shouldCreate, err := confirmCreate()
+
+	if err != nil {
+		return nil, err
 	}
 
-	areYouSure, areYouSureError := promptAreYouSure.Run()
-
-	if areYouSureError != nil {
-		return nil, areYouSureError
-	}
-
-	if areYouSure != "y" {
-		return nil, areYouSureError
+	if !shouldCreate {
+		return nil, err
 	}
 
 	createRequest := &godo.DropletCreateRequest{
@@ -132,7 +93,7 @@ func CreateDroplet() (*godo.Droplet, error) {
 			godo.DropletCreateSSHKey{ID: sshKeyID},
 		},
 		Image: godo.DropletCreateImage{
-			Slug: selectedImage.Value,
+			Slug: selectedImage,
 		},
 	}
 
@@ -141,11 +102,17 @@ func CreateDroplet() (*godo.Droplet, error) {
 	return newDroplet, createDropletError
 }
 
+// getToken first will check if the digitaloceantoken is present in the config file
+// if not it will ask you to enter the token.
+// Finally it will ask you if you would like to save this to a config file
 func getToken() (string, error) {
 	configSetup, err := config.Config()
 
 	var digitalOceanToken string
 
+	// if the error code shows that the config file doesn't exists
+	// ask the user to enter it
+	// ask if they want to save the key to a file
 	if err != nil && err.Code == 01 {
 		promptDigitalOceanToken := promptui.Prompt{
 			Label: "Enter your Digital Ocean API Token",
@@ -181,7 +148,8 @@ func getToken() (string, error) {
 	return digitalOceanToken, nil
 }
 
-// DisplayDropletList gets all the droplets and formats it nicely to be printed
+// DisplayDropletList gets all the droplets and formats it with some colours.
+// Finally priting it to the terminal
 func DisplayDropletList() {
 	digitalOceanToken, tokenError := getToken()
 
@@ -212,6 +180,7 @@ func DisplayDropletList() {
 	}
 }
 
+// dropletList will return a list of droplets for an account using the godo client
 func dropletList(ctx context.Context, client *godo.Client) ([]godo.Droplet, error) {
 	// create a list to hold our droplets
 	list := []godo.Droplet{}
@@ -246,7 +215,7 @@ func dropletList(ctx context.Context, client *godo.Client) ([]godo.Droplet, erro
 	return list, nil
 }
 
-// RegionList will list all the regions from DO
+// regionList will return a list of regions using the godo client
 func regionList(ctx context.Context, client *godo.Client) ([]utils.SelectItem, error) {
 	// create a list to hold our droplets
 	list := []godo.Region{}
@@ -283,8 +252,8 @@ func regionList(ctx context.Context, client *godo.Client) ([]utils.SelectItem, e
 	return selectList, nil
 }
 
-// ImageList will list all the regions from DO
-func ImageList(ctx context.Context, client *godo.Client) ([]utils.SelectItem, error) {
+// imageList will return a list all of the available images using the godo client
+func imageList(ctx context.Context, client *godo.Client) ([]utils.SelectItem, error) {
 	// create a list to hold our droplets
 	list := []godo.Image{}
 
@@ -320,8 +289,8 @@ func ImageList(ctx context.Context, client *godo.Client) ([]utils.SelectItem, er
 	return selectList, nil
 }
 
-// SizeList will list all the regions from DO
-func SizeList(ctx context.Context, client *godo.Client) ([]utils.SelectItem, error) {
+// sizeList will return a list of sizes using the godo client
+func sizeList(ctx context.Context, client *godo.Client) ([]utils.SelectItem, error) {
 	// create a list to hold our droplets
 	list := []godo.Size{}
 
@@ -357,8 +326,8 @@ func SizeList(ctx context.Context, client *godo.Client) ([]utils.SelectItem, err
 	return selectList, nil
 }
 
-// SSHKeyList will list all the regions from DO
-func SSHKeyList(ctx context.Context, client *godo.Client) ([]utils.SelectItem, error) {
+// sshKeyList will return a list of available SSH keys on your account
+func sshKeyList(ctx context.Context, client *godo.Client) ([]utils.SelectItem, error) {
 	// create a list to hold our droplets
 	list := []godo.Key{}
 
@@ -392,4 +361,113 @@ func SSHKeyList(ctx context.Context, client *godo.Client) ([]utils.SelectItem, e
 	selectList := utils.ParseSSHKeyListResults(list)
 
 	return selectList, nil
+}
+
+// getSelectedSSHKeyID will get all ssh keys on the account
+// asks the user to select one
+// once one is selected, convert it into an int
+// return the ID (11111111)
+func getSelectedSSHKeyID(ctx context.Context, client *godo.Client) (int, error) {
+	keyList, err := sshKeyList(ctx, client)
+
+	if err != nil {
+		fmt.Printf("Something bad happened getting region list: %s\n\n", err)
+		return -1, err
+	}
+
+	selectedKey, err := utils.AskAndAnswerCustomSelect("SSH Key Select", keyList)
+
+	if err != nil {
+		fmt.Printf("Failed to ask SSH key question: %s", err)
+		return -1, err
+	}
+
+	sshKeyID, strconvError := strconv.Atoi(selectedKey)
+
+	if strconvError != nil {
+		fmt.Println("ssh key id was not an int")
+		return -1, strconvError
+	}
+
+	return sshKeyID, nil
+}
+
+// getSelectedRegionSlug will get all the regions
+// ask the user to chose one
+// returns the slug of the region (nyc1)
+func getSelectedRegionSlug(ctx context.Context, client *godo.Client) (string, error) {
+	regionList, regionListError := regionList(ctx, client)
+
+	if regionListError != nil {
+		fmt.Printf("Something bad happened getting region list: %s\n\n", regionListError)
+		return "", regionListError
+	}
+
+	selectedRegion, err := utils.AskAndAnswerCustomSelect("Region Select", regionList)
+
+	if err != nil {
+		fmt.Printf("Failed to ask region question: %s", err)
+		return "", err
+	}
+
+	return selectedRegion, nil
+}
+
+// getSelectedSizeSlug will get all sizes of droplets
+// ask the user to chose one
+// returns the slug of the chose size (s-1vcpu-1gb)
+func getSelectedSizeSlug(ctx context.Context, client *godo.Client) (string, error) {
+	sizeList, sizeListError := sizeList(ctx, client)
+
+	if sizeListError != nil {
+		fmt.Printf("Something bad happened getting size list: %s\n\n", sizeListError)
+		return "", sizeListError
+	}
+
+	selectedSize, err := utils.AskAndAnswerCustomSelect("Size Select", sizeList)
+
+	if err != nil {
+		fmt.Printf("Failed to ask size question, %s", err)
+		return "", err
+	}
+
+	return selectedSize, nil
+}
+
+// getSelectedImageSlug will get all the available images
+// asks the use to chose one
+// returns the chosen image slug (ubuntu-19-10-x64)
+func getSelectedImageSlug(ctx context.Context, client *godo.Client) (string, error) {
+	imageList, imageListError := imageList(ctx, client)
+
+	if imageListError != nil {
+		fmt.Printf("Something bad happened getting image list: %s\n\n", imageListError)
+		return "", imageListError
+	}
+
+	selectedImage, err := utils.AskAndAnswerCustomSelect("Image Select", imageList)
+
+	if err != nil {
+		fmt.Printf("Failed to ask image question, %s", err)
+		return "", err
+	}
+
+	return selectedImage, nil
+}
+
+// confirmCreate asks the user if they are sure they want to create the droplet
+// answering with a "y" will return true
+func confirmCreate() (bool, error) {
+	promptAreYouSure := promptui.Prompt{
+		Label:    "Are you sure? (y/n)",
+		Validate: utils.ValidateAreYouSure,
+	}
+
+	areYouSure, err := promptAreYouSure.Run()
+
+	if err != nil {
+		return false, err
+	}
+
+	return areYouSure == "y", nil
 }
