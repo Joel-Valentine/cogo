@@ -127,7 +127,7 @@ func DestroyDroplet() (*utils.SelectItem, error) {
 
 	selectItemDroplets := utils.ParseDropletListResults(droplets)
 
-	selectDropletPrompt := utils.CreateCustomSelectPrompt("Select Droplet to Delete", selectItemDroplets)
+	selectDropletPrompt := utils.CreateCustomSelectPrompt("Select droplet to delete", selectItemDroplets)
 
 	selectedDropletIndex, _, err := selectDropletPrompt.Run()
 
@@ -170,7 +170,7 @@ func DestroyDroplet() (*utils.SelectItem, error) {
 	}
 
 	promptReEnterDropletName := promptui.Prompt{
-		Label:    "Re enter Droplet name to confirm delete (WARNING DROPLET WILL BE DELETED FOREVER)",
+		Label:    "Re enter droplet name to confirm delete (WARNING DROPLET WILL BE DELETED FOREVER)",
 		Validate: validateDropletNameDeletion,
 	}
 
@@ -182,6 +182,7 @@ func DestroyDroplet() (*utils.SelectItem, error) {
 	}
 
 	fullDropletInfo := droplets[selectedDropletIndex]
+
 	selectedDropletIP, err := fullDropletInfo.PublicIPv4()
 
 	if err != nil {
