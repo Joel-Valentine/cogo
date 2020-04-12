@@ -1,4 +1,4 @@
-# cogo
+# Cogo
 
 Cogo is an easy way to interact with cloud providers. It currently allows you to create a droplet on DO and list your droplets
 
