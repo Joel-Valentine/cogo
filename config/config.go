@@ -67,7 +67,6 @@ func init() {
 }
 
 func readViperConfig() *viper.Viper {
-	fmt.Printf("%s", PossibleSaveLocations)
 	v := viper.New()
 	v.SetConfigName(".cogo")
 	v.SetConfigType("json")
