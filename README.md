@@ -84,6 +84,6 @@ $ ./bin/cogo
 
 If you've read this far you're probably the right person to add to this project
 
-Please read the [contributing](CONTRIBUTING.md) guide on how to get started
+Please read the [contributing](.github/CONTRIBUTING.md) guide on how to get started
 
 I am still learning Go at the moment so don't feel like you need to be a wizard to contribute
