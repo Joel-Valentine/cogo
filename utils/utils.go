@@ -45,6 +45,19 @@ func CreateCustomSelectPrompt(title string, completeList []SelectItem) promptui.
 	return prompt
 }
 
+// GetAnswerFromCustomPrompt will take in a select prompt (usually custom) and return the selected answer as a string
+func GetAnswerFromCustomPrompt(prompt promptui.Select, list []SelectItem) (string, error) {
+	index, _, err := prompt.Run()
+
+	if err != nil {
+		return "", err
+	}
+
+	selected := list[index]
+
+	return selected.Value, nil
+}
+
 // ValidateAreYouSure will check whether they entered yes
 func ValidateAreYouSure(input string) error {
 	if input == "y" || input == "n" {

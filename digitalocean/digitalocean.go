@@ -63,14 +63,12 @@ func CreateDroplet() (*godo.Droplet, error) {
 
 	sizePrompt := utils.CreateCustomSelectPrompt("Size Select", sizeList)
 
-	sizeIndex, _, sizePromptError := sizePrompt.Run()
+	selectedSize, err := utils.GetAnswerFromCustomPrompt(sizePrompt, sizeList)
 
-	if sizePromptError != nil {
-		fmt.Printf("Prompt failed %v\n", sizePromptError)
-		return nil, sizePromptError
+	if err != nil {
+		fmt.Printf("Failed to ask question, %s", err)
+		return nil, err
 	}
-
-	selectedSize := sizeList[sizeIndex]
 
 	regionList, regionListError := regionList(ctx, client)
 
@@ -81,14 +79,12 @@ func CreateDroplet() (*godo.Droplet, error) {
 
 	regionPrompt := utils.CreateCustomSelectPrompt("Region Select", regionList)
 
-	regionIndex, _, regionPromptError := regionPrompt.Run()
+	selectedRegion, err := utils.GetAnswerFromCustomPrompt(regionPrompt, regionList)
 
-	if regionPromptError != nil {
-		fmt.Printf("Prompt failed %v\n", regionPromptError)
-		return nil, regionPromptError
+	if err != nil {
+		fmt.Printf("Failed to ask question: %s", err)
+		return nil, err
 	}
-
-	selectedRegion := regionList[regionIndex]
 
 	keyList, sshKeyListError := SSHKeyList(ctx, client)
 
@@ -99,16 +95,14 @@ func CreateDroplet() (*godo.Droplet, error) {
 
 	sshKeyPrompt := utils.CreateCustomSelectPrompt("SSH Key Select", keyList)
 
-	keyIndex, _, sshKeyPromptError := sshKeyPrompt.Run()
+	selectedKey, err := utils.GetAnswerFromCustomPrompt(sshKeyPrompt, keyList)
 
-	if sshKeyPromptError != nil {
-		fmt.Printf("Prompt failed %v\n", sshKeyPromptError)
-		return nil, sshKeyPromptError
+	if err != nil {
+		fmt.Printf("Failed to ask question: %s", err)
+		return nil, err
 	}
 
-	selectedKey := keyList[keyIndex]
-
-	sshKeyID, strconvError := strconv.Atoi(selectedKey.Value)
+	sshKeyID, strconvError := strconv.Atoi(selectedKey)
 
 	if strconvError != nil {
 		fmt.Println("ssh key id was not an int")
@@ -132,8 +126,8 @@ func CreateDroplet() (*godo.Droplet, error) {
 
 	createRequest := &godo.DropletCreateRequest{
 		Name:   dropletName,
-		Region: selectedRegion.Value,
-		Size:   selectedSize.Value,
+		Region: selectedRegion,
+		Size:   selectedSize,
 		SSHKeys: []godo.DropletCreateSSHKey{
 			godo.DropletCreateSSHKey{ID: sshKeyID},
 		},
