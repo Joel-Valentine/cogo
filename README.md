@@ -1,6 +1,8 @@
 # Cogo
 
-Cogo is an easy way to interact with cloud providers. It currently allows you to create a droplet on DigitalOcean, delete a droplet and list your droplets.
+Interactive cloud provider tool. Currently allows you to create a droplet on DigitalOcean, delete a droplet and list your droplets.
+
+I built this as a way to learn Go and have a quick way to make a server without having to go to digitalocean.com
 
 ![Cogo example gif](https://im4.ezgif.com/tmp/ezgif-4-dee834290b20.gif)
 
