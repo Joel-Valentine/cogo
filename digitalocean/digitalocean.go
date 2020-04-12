@@ -505,8 +505,6 @@ func getSelectedSSHKeyID(ctx context.Context, client *godo.Client) (int, error) 
 func getSelectedRegionSlug(ctx context.Context, client *godo.Client) (string, error) {
 	regionList, regionListError := regionList(ctx, client)
 
-	fmt.Println(regionList)
-
 	if regionListError != nil {
 		fmt.Printf("Something bad happened getting region list: %s\n\n", regionListError)
 		return "", regionListError
