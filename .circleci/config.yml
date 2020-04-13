@@ -31,6 +31,9 @@ jobs:
       - run: go get -v -t -d ./...
       - run: go test -v ./...
 workflows:
+  build:
+    jobs:
+      - build
   main:
     jobs:
       - release:
