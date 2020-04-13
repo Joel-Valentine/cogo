@@ -6,7 +6,7 @@ I built this as a way to learn Go and have a quick way to make a server without 
 
 [Contribution Guidelines](./.github/CONTRIBUTING.md)
 
-[![GitHub release](https://img.shields.io/github/v/tag/Midnight-Conqueror/cogo.svg?label=latest&sort=semver)](https://github.com/Midnight-Conqueror/cogo/releases)
+[![GitHub release](https://img.shields.io/github/v/tag/Midnight-Conqueror/cogo.svg?label=latest)](https://github.com/Midnight-Conqueror/cogo/releases)
 [![CircleCI](https://circleci.com/gh/Midnight-Conqueror/cogo.svg?style=svg)](https://circleci.com/gh/Midnight-Conqueror/cogo)
 [![Go Report Card](https://goreportcard.com/badge/github.com/Midnight-Conqueror/cogo)](https://goreportcard.com/report/github.com/Midnight-Conqueror/cogo)
 
