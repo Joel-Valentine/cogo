@@ -1,7 +1,7 @@
 # Golang CircleCI 2.0 configuration file
 #
 # Check https://circleci.com/docs/2.0/language-go/ for more details
-version: 2
+version: 2.1
 workflows:
   main:
     jobs:
@@ -13,6 +13,12 @@ workflows:
             tags:
               only: /v[0-9]+(\.[0-9]+)*(-.*)*/
 jobs:
+  release:
+    docker:
+      - image: circleci/golang:1.14
+    steps:
+      - checkout
+      - run: curl -sL https://git.io/goreleaser | bash
   build:
     docker:
       # specify the version
@@ -34,9 +40,3 @@ jobs:
       # specify any bash command here prefixed with `run: `
       - run: go get -v -t -d ./...
       - run: go test -v ./...
-  release:
-    docker:
-      - image: circleci/golang:1.14
-    steps:
-      - checkout
-      - run: curl -sL https://git.io/goreleaser | bash
