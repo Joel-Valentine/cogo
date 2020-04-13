@@ -11,7 +11,7 @@ I built this as a way to learn Go and have a quick way to make a server without 
 [![Go Report Card](https://goreportcard.com/badge/github.com/Midnight-Conqueror/cogo)](https://goreportcard.com/report/github.com/Midnight-Conqueror/cogo)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
-![Cogo example gif](https://imgur.com/oLMYjhL)
+![Cogo example gif](https://imgur.com/oLMYjhL.gif)
 
 ## Supported providers
 
