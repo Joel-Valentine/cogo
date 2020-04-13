@@ -19,6 +19,14 @@ I built this as a way to learn Go and have a quick way to make a server without 
 
 ## Installing
 
+### From Brew
+
+```bash
+brew install Midnight-Conqueror/tap/cogo
+```
+
+### From binary
+
 Find the latest release in releases for your machines architecture, download and run either from within the directory `./cogo` or by moving it into the `/usr/local/bin` to be accessed from anywhere.
 
 ### Configuration
