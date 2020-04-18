@@ -15,6 +15,8 @@ import (
 	"strings"
 )
 
+var imageFork = []utils.SelectItem{{Name: "Distributions", Value: "D"}, {Name: "Applications", Value: "A"}, {Name: "Custom", Value: "C"}}
+
 // CreateDroplet will ask the user a series of questions to determine what kind of
 // droplet they would like to be create
 // 1. Asks for a digital ocean api token
@@ -49,11 +51,46 @@ func CreateDroplet() (*godo.Droplet, error) {
 		return nil, promptDropletError
 	}
 
-	selectedImage, err := getSelectedImageSlug(ctx, client)
+	distAppCustom, distAppCustomErr := utils.AskAndAnswerCustomSelect("Select Image Type", imageFork)
 
-	if err != nil {
-		fmt.Printf("Failed to get image slug: %s", err)
-		return nil, err
+	if distAppCustomErr != nil {
+		fmt.Printf("Could not get Image or Distribtion %v\n", distAppCustomErr)
+		return nil, distAppCustomErr
+	}
+
+	var selectedImage string
+
+	if distAppCustom == "A" {
+		selected, err := getSelectedImageApplicationSlug(ctx, client)
+
+		if err != nil {
+			fmt.Printf("Failed to get application image slug: %s", err)
+			return nil, err
+		}
+
+		selectedImage = selected
+	}
+
+	if distAppCustom == "D" {
+		selected, err := getSelectedImageDistributionSlug(ctx, client)
+
+		if err != nil {
+			fmt.Printf("Failed to get distribution image slug: %s", err)
+			return nil, err
+		}
+
+		selectedImage = selected
+	}
+
+	if distAppCustom == "C" {
+		selected, err := getSelectedCustomImageSlug(ctx, client)
+
+		if err != nil {
+			fmt.Printf("Failed to get custom image slug: %s", err)
+			return nil, err
+		}
+
+		selectedImage = selected
 	}
 
 	selectedSize, err := getSelectedSizeSlug(ctx, client)
@@ -434,6 +471,117 @@ func sizeList(ctx context.Context, client *godo.Client) ([]utils.SelectItem, err
 	return selectList, nil
 }
 
+// imageDistributionList will return a list of distribution images using the godo client
+func imageDistributionList(ctx context.Context, client *godo.Client) ([]utils.SelectItem, error) {
+	// create a list to hold our droplets
+	list := []godo.Image{}
+
+	// create options. initially, these will be blank
+	opt := &godo.ListOptions{}
+	for {
+		images, resp, err := client.Images.ListDistribution(ctx, opt)
+		if err != nil {
+			return nil, err
+		}
+
+		// append the current page's regions to our list
+		for _, d := range images {
+			list = append(list, d)
+		}
+
+		// if we are at the last page, break out the for loop
+		if resp.Links == nil || resp.Links.IsLastPage() {
+			break
+		}
+
+		page, err := resp.Links.CurrentPage()
+		if err != nil {
+			return nil, err
+		}
+
+		// set the page we want for the next request
+		opt.Page = page + 1
+	}
+
+	selectList := utils.ParseImageListResults(list)
+
+	return selectList, nil
+}
+
+// imageApplicationList will return a list of application images using the godo client
+func imageApplicationList(ctx context.Context, client *godo.Client) ([]utils.SelectItem, error) {
+	// create a list to hold our droplets
+	list := []godo.Image{}
+
+	// create options. initially, these will be blank
+	opt := &godo.ListOptions{}
+	for {
+		images, resp, err := client.Images.ListApplication(ctx, opt)
+		if err != nil {
+			return nil, err
+		}
+
+		// append the current page's regions to our list
+		for _, d := range images {
+			list = append(list, d)
+		}
+
+		// if we are at the last page, break out the for loop
+		if resp.Links == nil || resp.Links.IsLastPage() {
+			break
+		}
+
+		page, err := resp.Links.CurrentPage()
+		if err != nil {
+			return nil, err
+		}
+
+		// set the page we want for the next request
+		opt.Page = page + 1
+	}
+
+	selectList := utils.ParseImageListResults(list)
+
+	return selectList, nil
+}
+
+// imageCustomList will return a list of custom user images using the godo client
+func imageCustomList(ctx context.Context, client *godo.Client) ([]utils.SelectItem, error) {
+	// create a list to hold our droplets
+	list := []godo.Image{}
+
+	// create options. initially, these will be blank
+	opt := &godo.ListOptions{}
+	for {
+		images, resp, err := client.Images.ListUser(ctx, opt)
+		if err != nil {
+			return nil, err
+		}
+
+		// append the current page's regions to our list
+		for _, d := range images {
+			list = append(list, d)
+		}
+
+		// if we are at the last page, break out the for loop
+		if resp.Links == nil || resp.Links.IsLastPage() {
+			break
+		}
+
+		page, err := resp.Links.CurrentPage()
+		if err != nil {
+			return nil, err
+		}
+
+		// set the page we want for the next request
+		opt.Page = page + 1
+	}
+
+	selectList := utils.ParseImageListResults(list)
+
+	return selectList, nil
+}
+
 // sshKeyList will return a list of available SSH keys on your account
 func sshKeyList(ctx context.Context, client *godo.Client) ([]utils.SelectItem, error) {
 	// create a list to hold our droplets
@@ -542,11 +690,75 @@ func getSelectedSizeSlug(ctx context.Context, client *godo.Client) (string, erro
 	return selectedSize, nil
 }
 
-// getSelectedImageSlug will get all the available images
+// getSelectedImageApplicationSlug will get the application images
+// asks the use to chose one
+// returns the chosen image slug (cassandra, centos)
+func getSelectedImageApplicationSlug(ctx context.Context, client *godo.Client) (string, error) {
+	imageList, imageListError := imageApplicationList(ctx, client)
+
+	if imageListError != nil {
+		fmt.Printf("Something bad happened getting image list: %s\n\n", imageListError)
+		return "", imageListError
+	}
+
+	selectedImage, err := utils.AskAndAnswerCustomSelect("Image Select", imageList)
+
+	if err != nil {
+		fmt.Printf("Failed to ask image question, %s", err)
+		return "", err
+	}
+
+	return selectedImage, nil
+}
+
+// getSelectedImageDistributionSlug will get all the distribution  images
+// asks the use to chose one
+// returns the chosen image slug (ubuntu-19-10-x64)
+func getSelectedImageDistributionSlug(ctx context.Context, client *godo.Client) (string, error) {
+	imageList, imageListError := imageDistributionList(ctx, client)
+
+	if imageListError != nil {
+		fmt.Printf("Something bad happened getting image list: %s\n\n", imageListError)
+		return "", imageListError
+	}
+
+	selectedImage, err := utils.AskAndAnswerCustomSelect("Image Select", imageList)
+
+	if err != nil {
+		fmt.Printf("Failed to ask image question, %s", err)
+		return "", err
+	}
+
+	return selectedImage, nil
+}
+
+// getSelectedImageSlug is deprecated for now
+// will get all the available images
 // asks the use to chose one
 // returns the chosen image slug (ubuntu-19-10-x64)
 func getSelectedImageSlug(ctx context.Context, client *godo.Client) (string, error) {
 	imageList, imageListError := imageList(ctx, client)
+
+	if imageListError != nil {
+		fmt.Printf("Something bad happened getting image list: %s\n\n", imageListError)
+		return "", imageListError
+	}
+
+	selectedImage, err := utils.AskAndAnswerCustomSelect("Image Select", imageList)
+
+	if err != nil {
+		fmt.Printf("Failed to ask image question, %s", err)
+		return "", err
+	}
+
+	return selectedImage, nil
+}
+
+// getSelectedCustomImageSlug will get all the available images
+// asks the use to chose one
+// returns the chosen image slug (ubuntu-19-10-x64)
+func getSelectedCustomImageSlug(ctx context.Context, client *godo.Client) (string, error) {
+	imageList, imageListError := imageCustomList(ctx, client)
 
 	if imageListError != nil {
 		fmt.Printf("Something bad happened getting image list: %s\n\n", imageListError)
