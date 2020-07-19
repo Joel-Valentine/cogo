@@ -2,10 +2,11 @@ package utils
 
 import (
 	"errors"
-	"github.com/digitalocean/godo"
-	"github.com/manifoldco/promptui"
 	"strconv"
 	"strings"
+
+	"github.com/digitalocean/godo"
+	"github.com/manifoldco/promptui"
 )
 
 // SelectItem is used for custom selects
@@ -21,9 +22,9 @@ func CreateCustomSelectPrompt(title string, completeList []SelectItem) promptui.
 	templates := &promptui.SelectTemplates{
 		Label: "{{ . }}?",
 
-		Active:   "\U0001F449{{ .Name | cyan }} ({{ .Value | red }})",
+		Active:   "> {{ .Name | cyan }} ({{ .Value | red }})",
 		Inactive: "  {{ .Name | cyan }} ({{ .Value | red }})",
-		Selected: "\U0001F449{{ .Name | red | cyan }}",
+		Selected: "> {{ .Name | red | cyan }}",
 	}
 
 	searcher := func(input string, index int) bool {

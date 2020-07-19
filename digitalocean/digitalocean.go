@@ -24,7 +24,7 @@ var imageFork = []utils.SelectItem{{Name: "Distributions", Value: "D"}, {Name: "
 // 3. Asks what Image you would like to use on the droplet (ubuntu, centos...)
 // 4. Asks what size you would like the droplet to be (1gb RAM 1 CPU..)
 // 5. Asks what region you want the droplet to be hosted in (London, Amsterdam...)
-// 6. Asks what SSH Key you wouldl like to use to access the droplet
+// 6. Asks what SSH Key you would like to use to access the droplet
 // 7. Asks if you are sure with a y/n answer. It will not create a droplet if you chose n
 // Finally the droplet is created and returned
 func CreateDroplet() (*godo.Droplet, error) {
