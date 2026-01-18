@@ -21,7 +21,7 @@ help:
 build:
 	@echo "building ${BIN_NAME} ${VERSION}"
 	@echo "GOPATH=${GOPATH}"
-	go build -ldflags "-X github.com/Midnight-Conqueror/cogo/version.GitCommit=${GIT_COMMIT}${GIT_DIRTY} -X github.com/Midnight-Conqueror/cogo/version.BuildDate=${BUILD_DATE}" -o bin/${BIN_NAME}
+	go build -ldflags "-X github.com/Joel-Valentine/cogo/version.GitCommit=${GIT_COMMIT}${GIT_DIRTY} -X github.com/Joel-Valentine/cogo/version.BuildDate=${BUILD_DATE}" -o bin/${BIN_NAME}
 
 get-deps:
 	dep ensure

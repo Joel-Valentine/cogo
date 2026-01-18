@@ -4,8 +4,8 @@ import (
 	"fmt"
 	"os"
 
-	do "github.com/Midnight-Conqueror/cogo/digitalocean"
-	"github.com/Midnight-Conqueror/cogo/utils"
+	do "github.com/Joel-Valentine/cogo/digitalocean"
+	"github.com/Joel-Valentine/cogo/utils"
 	"github.com/fatih/color"
 	"github.com/spf13/cobra"
 )

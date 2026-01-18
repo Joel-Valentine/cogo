@@ -1,4 +1,4 @@
-module github.com/Midnight-Conqueror/cogo
+module github.com/Joel-Valentine/cogo
 
 require (
 	github.com/coreos/go-etcd v2.0.0+incompatible // indirect
