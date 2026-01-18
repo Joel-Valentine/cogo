@@ -1,7 +1,7 @@
 package main
 
 import (
-	"github.com/Midnight-Conqueror/cogo/cmd"
+	"github.com/Joel-Valentine/cogo/cmd"
 )
 
 func main() {

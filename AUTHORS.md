@@ -2,7 +2,7 @@
 
 ## Development Lead
 
-- Joel Valentine [Midnight-Conqueror](https://github.com/Midnight-Conqueror)
+- Joel Valentine [Joel-Valentine](https://github.com/Joel-Valentine)
 
 ## Contributors
 

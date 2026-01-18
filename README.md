@@ -6,9 +6,8 @@ I built this as a way to learn Go and have a quick way to make a server without 
 
 [Contribution Guidelines](./.github/CONTRIBUTING.md)
 
-[![GitHub release](https://img.shields.io/github/v/tag/Midnight-Conqueror/cogo.svg?label=latest)](https://github.com/Midnight-Conqueror/cogo/releases)
-[![CircleCI](https://circleci.com/gh/Midnight-Conqueror/cogo.svg?style=svg)](https://circleci.com/gh/Midnight-Conqueror/cogo)
-[![Go Report Card](https://goreportcard.com/badge/github.com/Midnight-Conqueror/cogo)](https://goreportcard.com/report/github.com/Midnight-Conqueror/cogo)
+[![GitHub release](https://img.shields.io/github/v/tag/Joel-Valentine/cogo.svg?label=latest)](https://github.com/Joel-Valentine/cogo/releases)
+[![Go Report Card](https://goreportcard.com/badge/github.com/Joel-Valentine/cogo)](https://goreportcard.com/report/github.com/Joel-Valentine/cogo)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
 ![Cogo example gif](https://imgur.com/oLMYjhL.gif)
@@ -22,7 +21,7 @@ I built this as a way to learn Go and have a quick way to make a server without 
 ### From Brew
 
 ```bash
-brew install Midnight-Conqueror/tap/cogo
+brew install Joel-Valentine/tap/cogo
 ```
 
 ### From binary

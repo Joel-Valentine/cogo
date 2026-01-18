@@ -2,7 +2,7 @@ package cmd
 
 import (
 	"fmt"
-	"github.com/Midnight-Conqueror/cogo/version"
+	"github.com/Joel-Valentine/cogo/version"
 	"github.com/spf13/cobra"
 )
 
