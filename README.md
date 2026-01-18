@@ -6,6 +6,7 @@ I built this as a way to learn Go and have a quick way to make a server without 
 
 [Contribution Guidelines](./.github/CONTRIBUTING.md)
 
+[![CI](https://github.com/Joel-Valentine/cogo/actions/workflows/ci.yml/badge.svg)](https://github.com/Joel-Valentine/cogo/actions/workflows/ci.yml)
 [![GitHub release](https://img.shields.io/github/v/tag/Joel-Valentine/cogo.svg?label=latest)](https://github.com/Joel-Valentine/cogo/releases)
 [![Go Report Card](https://goreportcard.com/badge/github.com/Joel-Valentine/cogo)](https://goreportcard.com/report/github.com/Joel-Valentine/cogo)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)

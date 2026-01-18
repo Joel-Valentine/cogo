@@ -29,8 +29,8 @@ func CreateCustomSelectPrompt(title string, completeList []SelectItem) promptui.
 
 	searcher := func(input string, index int) bool {
 		item := selectList[index]
-		name := strings.Replace(strings.ToLower(item.Name), " ", "", -1)
-		input = strings.Replace(strings.ToLower(input), " ", "", -1)
+		name := strings.ReplaceAll(strings.ToLower(item.Name), " ", "")
+		input = strings.ReplaceAll(strings.ToLower(input), " ", "")
 
 		return strings.Contains(name, input)
 	}
