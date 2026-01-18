@@ -74,11 +74,25 @@ func (s *SelectDropletToDestroyStep) Execute(ctx context.Context, state navigati
 		items[i] = item.Name
 	}
 
+	// Add back option if we can go back
+	if state.CanGoBack() {
+		items = append([]string{"← Back"}, items...)
+	}
+	
 	prompt := navigation.NewSelectPrompt(s.Prompt(), items)
-
-	index, _, err := prompt.RunWithContext(ctx)
+	index, selected, err := prompt.RunWithContext(ctx)
 	if err != nil {
 		return navigation.Result{}, err
+	}
+
+	// Check if user selected "← Back"
+	if selected == "← Back" {
+		return navigation.Result{}, navigation.ErrGoBack
+	}
+
+	// Adjust index if back option was added
+	if state.CanGoBack() {
+		index--
 	}
 
 	selectedDroplet := s.droplets[index]

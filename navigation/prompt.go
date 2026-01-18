@@ -78,7 +78,7 @@ func (p *SelectPrompt) RunWithContext(ctx context.Context) (int, string, error) 
 	
 	// Only add help if not hidden
 	if !p.HideHelp {
-		templates.Help = "↑↓: Navigate | Enter: Select | Esc: Back | Ctrl+C: Cancel"
+		templates.Help = "↑↓: Navigate | Enter: Select | Ctrl+C: Cancel"
 	}
 	
 	// Create promptui select
@@ -99,20 +99,12 @@ func (p *SelectPrompt) RunWithContext(ctx context.Context) (int, string, error) 
 
 	// Handle errors
 	if err != nil {
-		// Check for specific error messages from promptui
-		errStr := err.Error()
-
 		// Ctrl+C or interrupt
-		if errors.Is(err, promptui.ErrInterrupt) || strings.Contains(errStr, "interrupt") {
+		if errors.Is(err, promptui.ErrInterrupt) || strings.Contains(err.Error(), "interrupt") {
 			return -1, "", context.Canceled
 		}
 
-		// EOF (Ctrl+D) or Esc - both mean "go back"
-		if errors.Is(err, promptui.ErrEOF) || strings.Contains(errStr, "EOF") || strings.Contains(errStr, "esc") || strings.Contains(errStr, "escape") {
-			return -1, "", ErrGoBack
-		}
-
-		// Unknown error
+		// Any other error
 		return -1, "", err
 	}
 

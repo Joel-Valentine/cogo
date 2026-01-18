@@ -106,11 +106,26 @@ func (s *ImageTypeStep) Prompt() string {
 
 func (s *ImageTypeStep) Execute(ctx context.Context, state navigation.State) (navigation.Result, error) {
 	items := []string{"Distributions", "Applications", "Custom"}
+	
+	// Add back option if we can go back
+	if state.CanGoBack() {
+		items = append([]string{"← Back"}, items...)
+	}
+	
 	prompt := navigation.NewSelectPrompt(s.Prompt(), items)
-
 	index, selected, err := prompt.RunWithContext(ctx)
 	if err != nil {
 		return navigation.Result{}, err
+	}
+
+	// Check if user selected "← Back"
+	if selected == "← Back" {
+		return navigation.Result{}, navigation.ErrGoBack
+	}
+
+	// Adjust index if back option was added
+	if state.CanGoBack() {
+		index--
 	}
 
 	// Map to codes: D, A, C
@@ -193,11 +208,25 @@ func (s *ImageSelectionStep) Execute(ctx context.Context, state navigation.State
 		items[i] = img.Name
 	}
 
+	// Add back option if we can go back
+	if state.CanGoBack() {
+		items = append([]string{"← Back"}, items...)
+	}
+	
 	prompt := navigation.NewSelectPrompt(s.Prompt(), items)
-
-	index, _, err := prompt.RunWithContext(ctx)
+	index, selected, err := prompt.RunWithContext(ctx)
 	if err != nil {
 		return navigation.Result{}, err
+	}
+
+	// Check if user selected "← Back"
+	if selected == "← Back" {
+		return navigation.Result{}, navigation.ErrGoBack
+	}
+
+	// Adjust index if back option was added
+	if state.CanGoBack() {
+		index--
 	}
 
 	selectedImage := imageList[index]
@@ -251,11 +280,25 @@ func (s *SizeSelectionStep) Execute(ctx context.Context, state navigation.State)
 		items[i] = size.Name
 	}
 
+	// Add back option if we can go back
+	if state.CanGoBack() {
+		items = append([]string{"← Back"}, items...)
+	}
+	
 	prompt := navigation.NewSelectPrompt(s.Prompt(), items)
-
-	index, _, err := prompt.RunWithContext(ctx)
+	index, selected, err := prompt.RunWithContext(ctx)
 	if err != nil {
 		return navigation.Result{}, err
+	}
+
+	// Check if user selected "← Back"
+	if selected == "← Back" {
+		return navigation.Result{}, navigation.ErrGoBack
+	}
+
+	// Adjust index if back option was added
+	if state.CanGoBack() {
+		index--
 	}
 
 	selectedSize := sizeList[index]
@@ -309,11 +352,25 @@ func (s *RegionSelectionStep) Execute(ctx context.Context, state navigation.Stat
 		items[i] = region.Name
 	}
 
+	// Add back option if we can go back
+	if state.CanGoBack() {
+		items = append([]string{"← Back"}, items...)
+	}
+	
 	prompt := navigation.NewSelectPrompt(s.Prompt(), items)
-
-	index, _, err := prompt.RunWithContext(ctx)
+	index, selected, err := prompt.RunWithContext(ctx)
 	if err != nil {
 		return navigation.Result{}, err
+	}
+
+	// Check if user selected "← Back"
+	if selected == "← Back" {
+		return navigation.Result{}, navigation.ErrGoBack
+	}
+
+	// Adjust index if back option was added
+	if state.CanGoBack() {
+		index--
 	}
 
 	selectedRegion := regionList[index]
@@ -367,11 +424,25 @@ func (s *SSHKeySelectionStep) Execute(ctx context.Context, state navigation.Stat
 		items[i] = key.Name
 	}
 
+	// Add back option if we can go back
+	if state.CanGoBack() {
+		items = append([]string{"← Back"}, items...)
+	}
+	
 	prompt := navigation.NewSelectPrompt(s.Prompt(), items)
-
-	index, _, err := prompt.RunWithContext(ctx)
+	index, selected, err := prompt.RunWithContext(ctx)
 	if err != nil {
 		return navigation.Result{}, err
+	}
+
+	// Check if user selected "← Back"
+	if selected == "← Back" {
+		return navigation.Result{}, navigation.ErrGoBack
+	}
+
+	// Adjust index if back option was added
+	if state.CanGoBack() {
+		index--
 	}
 
 	selectedKey := keyList[index]
