@@ -119,9 +119,9 @@ func TestManager_GetToken_NotFound(t *testing.T) {
 
 // mockProvider is a test implementation of Provider
 type mockProvider struct {
+	setError  error
 	name      string
 	token     string
-	setError  error
 	available bool
 }
 
