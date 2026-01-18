@@ -280,8 +280,9 @@ func (p *ConfirmPrompt) RunWithContext(ctx context.Context) (bool, error) {
 		Items:     items,
 		CursorPos: defaultIndex,
 		Size:      2,
+		HideHelp:  p.HideHelp,
 		Templates: &promptui.SelectTemplates{
-			Help: "{{ \"↑↓: Navigate\" | faint }} | {{ \"Enter: Confirm\" | faint }} | {{ \"Ctrl+C: Cancel\" | faint }}",
+			Help: "{{ \"↑↓: Navigate | Enter: Confirm | Ctrl+C: Cancel\" | faint }}",
 		},
 	}
 
