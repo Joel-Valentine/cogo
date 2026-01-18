@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"strings"
 
+	"github.com/fatih/color"
 	"github.com/manifoldco/promptui"
 )
 
@@ -30,7 +31,7 @@ func NewSelectPrompt(label string, items []string) *SelectPrompt {
 		Label:       label,
 		Items:       items,
 		HideHelp:    false,
-		defaultHelp: "Use arrow keys to navigate, 'b' for back, 'q' to quit",
+		defaultHelp: "Use arrow keys, Enter to select, Esc or 'q' to quit, Ctrl+C to cancel",
 	}
 }
 
@@ -72,10 +73,20 @@ func (p *SelectPrompt) RunWithContext(ctx context.Context) (int, string, error) 
 		label = fmt.Sprintf("%s (%s)", label, p.defaultHelp)
 	}
 
+	// Create custom templates to show our help text
+	templates := &promptui.SelectTemplates{
+		Label:    "{{ . }}",
+		Active:   "▸ {{ . | cyan }}",
+		Inactive: "  {{ . }}",
+		Selected: "✔ {{ . | green }}",
+		Help:     "Use arrow keys to navigate: ↑ ↓  |  Select: Enter  |  Back: Esc or 'q'  |  Cancel: Ctrl+C",
+	}
+	
 	// Create promptui select
 	prompt := promptui.Select{
-		Label:    label,
-		Items:    p.Items,
+		Label:     label,
+		Items:     p.Items,
+		Templates: templates,
 		CursorPos: p.cursorPos,
 	}
 
@@ -183,6 +194,11 @@ func (p *InputPrompt) RunWithContext(ctx context.Context) (string, error) {
 	}
 
 	for {
+		// Show help text
+		fmt.Println()
+		color.Cyan("(Type your text, press Enter to confirm, Esc to cancel, Ctrl+C to quit)")
+		fmt.Println()
+		
 		// Create promptui prompt
 		prompt := promptui.Prompt{
 			Label:   p.Label,
