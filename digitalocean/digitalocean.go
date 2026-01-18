@@ -383,7 +383,6 @@ func regionList(ctx context.Context, client *godo.Client) ([]utils.SelectItem, e
 	return selectList, nil
 }
 
-
 // sizeList will return a list of sizes using the godo client
 func sizeList(ctx context.Context, client *godo.Client) ([]utils.SelectItem, error) {
 	// create a list to hold our droplets
