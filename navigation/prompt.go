@@ -298,11 +298,6 @@ func (p *ConfirmPrompt) RunWithContext(ctx context.Context) (bool, error) {
 				return false, ErrCancel
 			}
 
-			// Validation error - re-prompt
-			if strings.Contains(errStr, "please enter") {
-				continue
-			}
-
 			return false, err
 		}
 
