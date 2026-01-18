@@ -501,8 +501,8 @@ func (s *CreateConfirmationStep) Execute(ctx context.Context, state navigation.S
 	color.Cyan("=============================")
 	fmt.Println()
 
-	// Confirm
-	prompt := navigation.NewConfirmPrompt(s.Prompt(), true)
+	// Confirm (default to No for safety)
+	prompt := navigation.NewConfirmPrompt(s.Prompt(), false)
 	confirmed, err := prompt.RunWithContext(ctx)
 	if err != nil {
 		return navigation.Result{}, err
