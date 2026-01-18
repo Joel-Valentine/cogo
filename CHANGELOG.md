@@ -1,3 +1,15 @@
+## 2.5.1 (2026-01-18)
+
+### Bug Fixes
+
+* **destroy**: Fix validation spam in droplet deletion prompt
+  - Removed `Validate` function that ran on every keystroke
+  - Moved validation to after user submission
+  - Provides clearer error message if name doesn't match
+  - Fixes annoying UX issue during droplet deletion
+
+---
+
 ## 2.5.0 (2026-01-18)
 
 ### 🔐 Security & Features
