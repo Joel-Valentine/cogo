@@ -671,7 +671,6 @@ func getSelectedImageDistributionSlug(ctx context.Context, client *godo.Client) 
 	return selectedImage, nil
 }
 
-
 // getSelectedCustomImageSlug will get all the available images
 // asks the use to chose one
 // returns the chosen image slug (ubuntu-19-10-x64)
