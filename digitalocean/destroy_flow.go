@@ -174,7 +174,14 @@ func (s *ReEnterDropletNameStep) Execute(ctx context.Context, state navigation.S
 	dropletResult, _ := state.GetResult("select_droplet")
 	expectedName := dropletResult.Metadata["name"].(string)
 
-	prompt := navigation.NewInputPrompt(s.Prompt(), "")
+	// Show the droplet name clearly so user can see what to type
+	fmt.Println()
+	color.Yellow("⚠️  DANGER ZONE: You must type the exact droplet name to confirm deletion")
+	fmt.Println()
+	color.Cyan("Droplet name: %s", expectedName)
+	fmt.Println()
+
+	prompt := navigation.NewInputPrompt("Type droplet name to confirm", "")
 	enteredName, err := prompt.RunWithContext(ctx)
 	if err != nil {
 		return navigation.Result{}, err
