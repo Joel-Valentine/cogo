@@ -191,19 +191,8 @@ func DestroyDroplet() (*utils.SelectItem, error) {
 		return nil, err
 	}
 
-	validateDropletNameDeletion := func(input string) error {
-		if len(input) <= 0 {
-			return errors.New("Must enter the name of the droplet you want to delete")
-		}
-		if input != selectedDroplet.Name {
-			return errors.New("Must enter the exact same name to delete")
-		}
-		return nil
-	}
-
 	promptReEnterDropletName := promptui.Prompt{
-		Label:    "Re enter droplet name to confirm delete (WARNING DROPLET WILL BE DELETED FOREVER)",
-		Validate: validateDropletNameDeletion,
+		Label: "Re enter droplet name to confirm delete (WARNING DROPLET WILL BE DELETED FOREVER)",
 	}
 
 	enteredDropletName, err := promptReEnterDropletName.Run()
@@ -211,6 +200,15 @@ func DestroyDroplet() (*utils.SelectItem, error) {
 	if err != nil {
 		fmt.Printf("Droplet name prompt failed %v\n", err)
 		return nil, err
+	}
+
+	// Validate after submission instead of on every keystroke
+	if len(enteredDropletName) == 0 {
+		return nil, errors.New("Must enter the name of the droplet you want to delete")
+	}
+	if enteredDropletName != selectedDroplet.Name {
+		color.Red("✗ Name doesn't match! Expected: %s, Got: %s", selectedDroplet.Name, enteredDropletName)
+		return nil, errors.New("Must enter the exact same name to delete")
 	}
 
 	fullDropletInfo := droplets[selectedDropletIndex]
