@@ -1,8 +1,10 @@
 package config
 
 import (
-	"github.com/spf13/viper"
+	"errors"
 	"time"
+
+	"github.com/spf13/viper"
 )
 
 // Provider defines a set of read-only methods for accessing the application
@@ -47,11 +49,11 @@ var defaultConfig *viper.Viper
 // Config returns a default config providers
 func Config() (Provider, *AppError) {
 	if err := defaultConfig.ReadInConfig(); err != nil {
-		if _, ok := err.(viper.ConfigFileNotFoundError); ok {
+		var configFileNotFoundError viper.ConfigFileNotFoundError
+		if errors.As(err, &configFileNotFoundError) {
 			return nil, &AppError{err, "No config file", 01}
-		} else {
-			return nil, &AppError{err, "Unable to read config file", 02}
 		}
+		return nil, &AppError{err, "Unable to read config file", 02}
 	}
 	return defaultConfig, nil
 }

@@ -129,7 +129,7 @@ func CreateDroplet() (*godo.Droplet, error) {
 		Region: selectedRegion,
 		Size:   selectedSize,
 		SSHKeys: []godo.DropletCreateSSHKey{
-			godo.DropletCreateSSHKey{ID: sshKeyID},
+			{ID: sshKeyID},
 		},
 		Image: godo.DropletCreateImage{
 			Slug: selectedImage,

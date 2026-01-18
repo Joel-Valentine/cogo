@@ -14,7 +14,7 @@ import (
 var rootCmd = &cobra.Command{
 	Use:   "Cogo create, list, destroy wizard",
 	Short: "For interacting with multiple cloud providers",
-	Long:  `Cogo is a CLI tool used to intreact easily as a wizard with multiple cloud providers`,
+	Long:  `Cogo is a CLI tool used to interact easily as a wizard with multiple cloud providers`,
 }
 
 // Execute adds all child commands to the root command and sets flags appropriately.
