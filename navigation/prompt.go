@@ -267,54 +267,43 @@ func (p *ConfirmPrompt) RunWithContext(ctx context.Context) (bool, error) {
 	default:
 	}
 
-	// Create label with default indication
-	label := p.Label
+	// Use Select instead of Prompt to avoid checkmark spam
+	// This is cleaner and matches common CLI patterns (kubectl, gh, etc.)
+	items := []string{"No", "Yes"}
+	defaultIndex := 0
 	if p.Default {
-		label += " (Y/n)"
-	} else {
-		label += " (y/N)"
+		defaultIndex = 1
 	}
 
-	// Create promptui prompt (NO per-keystroke validation to avoid spam)
-	prompt := promptui.Prompt{
-		Label:   label,
-		Default: "",
+	prompt := promptui.Select{
+		Label:     p.Label,
+		Items:     items,
+		CursorPos: defaultIndex,
+		Size:      2,
+		Templates: &promptui.SelectTemplates{
+			Help: "{{ \"↑↓: Navigate\" | faint }} | {{ \"Enter: Confirm\" | faint }} | {{ \"Ctrl+C: Cancel\" | faint }}",
+		},
 	}
 
-	for {
-		result, err := prompt.Run()
+	_, result, err := prompt.Run()
 
-		// Handle errors
-		if err != nil {
-			errStr := err.Error()
+	// Handle errors
+	if err != nil {
+		errStr := err.Error()
 
-			// Ctrl+C
-			if errors.Is(err, promptui.ErrInterrupt) || strings.Contains(errStr, "interrupt") {
-				return false, context.Canceled
-			}
-
-			// EOF or Esc
-			if errors.Is(err, promptui.ErrEOF) || strings.Contains(errStr, "EOF") || strings.Contains(errStr, "esc") {
-				return false, ErrCancel
-			}
-
-			return false, err
+		// Ctrl+C
+		if errors.Is(err, promptui.ErrInterrupt) || strings.Contains(errStr, "interrupt") {
+			return false, context.Canceled
 		}
 
-		// Parse result
-		result = strings.ToLower(strings.TrimSpace(result))
-		if result == "" {
-			return p.Default, nil
-		}
-		if result == "y" || result == "yes" {
-			return true, nil
-		}
-		if result == "n" || result == "no" {
-			return false, nil
+		// EOF or Esc
+		if errors.Is(err, promptui.ErrEOF) || strings.Contains(errStr, "EOF") || strings.Contains(errStr, "esc") {
+			return false, ErrCancel
 		}
 
-		// Should not reach here due to validation, but handle gracefully
-		fmt.Println("✗ Please enter 'y' or 'n'")
+		return false, err
 	}
+
+	return result == "Yes", nil
 }
 
