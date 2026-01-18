@@ -1,6 +1,6 @@
 module github.com/Joel-Valentine/cogo
 
-go 1.25
+go 1.24
 
 require (
 	github.com/digitalocean/godo v1.34.0
