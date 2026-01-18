@@ -38,8 +38,7 @@ func CreateDroplet() (*godo.Droplet, error) {
 	ctx := context.TODO()
 
 	promptDropletName := promptui.Prompt{
-		Label:    "Droplet Name",
-		Validate: utils.ValidateDropletName,
+		Label: "Droplet Name",
 	}
 
 	dropletName, promptDropletError := promptDropletName.Run()
@@ -47,6 +46,12 @@ func CreateDroplet() (*godo.Droplet, error) {
 	if promptDropletError != nil {
 		fmt.Printf("Droplet name prompt failed %v\n", promptDropletError)
 		return nil, promptDropletError
+	}
+
+	// Validate after Enter (research pattern: prevents keystroke spam)
+	if err := utils.ValidateDropletName(dropletName); err != nil {
+		color.Red("✗ Invalid droplet name: %v", err)
+		return nil, err
 	}
 
 	distAppCustom, distAppCustomErr := utils.AskAndAnswerCustomSelect("Select Image Type", imageFork)
@@ -159,6 +164,14 @@ func DestroyDroplet() (*utils.SelectItem, error) {
 
 	if err != nil {
 		return nil, err
+	}
+
+	// Check for empty state before prompting (prevents crash)
+	if len(droplets) == 0 {
+		fmt.Println("No droplets found in your DigitalOcean account.")
+		fmt.Println()
+		fmt.Println("Run 'cogo create' to create a droplet.")
+		return nil, nil
 	}
 
 	selectItemDroplets := utils.ParseDropletListResults(droplets)
@@ -320,6 +333,14 @@ func DisplayDropletList() {
 
 	if dropletListError != nil {
 		fmt.Println("Unable to get a list of droplets")
+	}
+
+	// Check for empty state
+	if len(dropletList) == 0 {
+		fmt.Println("No droplets found in your DigitalOcean account.")
+		fmt.Println()
+		fmt.Println("Run 'cogo create' to create a droplet.")
+		return
 	}
 
 	color.Green("\nYour droplets:\n\n")
@@ -590,6 +611,14 @@ func getSelectedSSHKeyID(ctx context.Context, client *godo.Client) (int, error) 
 		return -1, err
 	}
 
+	// Check for empty state
+	if len(keyList) == 0 {
+		fmt.Println("No SSH keys found in your DigitalOcean account.")
+		fmt.Println()
+		fmt.Println("Add an SSH key at: https://cloud.digitalocean.com/account/security")
+		return -1, errors.New("no SSH keys available")
+	}
+
 	selectedKey, err := utils.AskAndAnswerCustomSelect("SSH Key Select", keyList)
 
 	if err != nil {
@@ -618,6 +647,14 @@ func getSelectedRegionSlug(ctx context.Context, client *godo.Client) (string, er
 		return "", regionListError
 	}
 
+	// Check for empty state
+	if len(regionList) == 0 {
+		fmt.Println("No regions found in your DigitalOcean account.")
+		fmt.Println()
+		fmt.Println("Contact DigitalOcean support if you believe this is an error.")
+		return "", errors.New("no regions available")
+	}
+
 	selectedRegion, err := utils.AskAndAnswerCustomSelect("Region Select", regionList)
 
 	if err != nil {
@@ -637,6 +674,14 @@ func getSelectedSizeSlug(ctx context.Context, client *godo.Client) (string, erro
 	if sizeListError != nil {
 		fmt.Printf("Something bad happened getting size list: %s\n\n", sizeListError)
 		return "", sizeListError
+	}
+
+	// Check for empty state
+	if len(sizeList) == 0 {
+		fmt.Println("No droplet sizes found.")
+		fmt.Println()
+		fmt.Println("Contact DigitalOcean support if you believe this is an error.")
+		return "", errors.New("no droplet sizes available")
 	}
 
 	selectedSize, err := utils.AskAndAnswerCustomSelect("Size Select", sizeList)
@@ -660,6 +705,14 @@ func getSelectedImageApplicationSlug(ctx context.Context, client *godo.Client) (
 		return "", imageListError
 	}
 
+	// Check for empty state
+	if len(imageList) == 0 {
+		fmt.Println("No application images found.")
+		fmt.Println()
+		fmt.Println("Try selecting a different image type or contact DigitalOcean support.")
+		return "", errors.New("no application images available")
+	}
+
 	selectedImage, err := utils.AskAndAnswerCustomSelect("Image Select", imageList)
 
 	if err != nil {
@@ -679,6 +732,14 @@ func getSelectedImageDistributionSlug(ctx context.Context, client *godo.Client) 
 	if imageListError != nil {
 		fmt.Printf("Something bad happened getting image list: %s\n\n", imageListError)
 		return "", imageListError
+	}
+
+	// Check for empty state
+	if len(imageList) == 0 {
+		fmt.Println("No distribution images found.")
+		fmt.Println()
+		fmt.Println("Try selecting a different image type or contact DigitalOcean support.")
+		return "", errors.New("no distribution images available")
 	}
 
 	selectedImage, err := utils.AskAndAnswerCustomSelect("Image Select", imageList)
@@ -702,6 +763,14 @@ func getSelectedCustomImageSlug(ctx context.Context, client *godo.Client) (strin
 		return "", imageListError
 	}
 
+	// Check for empty state
+	if len(imageList) == 0 {
+		fmt.Println("No custom images found.")
+		fmt.Println()
+		fmt.Println("Upload a custom image at: https://cloud.digitalocean.com/images")
+		return "", errors.New("no custom images available")
+	}
+
 	selectedImage, err := utils.AskAndAnswerCustomSelect("Image Select", imageList)
 
 	if err != nil {
@@ -716,13 +785,18 @@ func getSelectedCustomImageSlug(ctx context.Context, client *godo.Client) (strin
 // answering with a "y" will return true
 func confirmCreate(label string) (bool, error) {
 	promptAreYouSure := promptui.Prompt{
-		Label:    label,
-		Validate: utils.ValidateAreYouSure,
+		Label: label,
 	}
 
 	areYouSure, err := promptAreYouSure.Run()
 
 	if err != nil {
+		return false, err
+	}
+
+	// Validate after Enter (research pattern: prevents keystroke spam)
+	if err := utils.ValidateAreYouSure(areYouSure); err != nil {
+		color.Red("✗ %v", err)
 		return false, err
 	}
 

@@ -45,6 +45,17 @@ type Manager struct {
 
 // NewManager creates a new credential manager with the given providers in priority order
 func NewManager(providers ...Provider) *Manager {
+	// If no providers specified, use default set
+	if len(providers) == 0 {
+		providers = []Provider{
+			NewFlagProvider(""),
+			NewEnvProvider(),
+			NewKeychainProvider(),
+			NewFileProvider(),
+			NewPromptProvider(),
+		}
+	}
+	
 	return &Manager{
 		providers: providers,
 	}
