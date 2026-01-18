@@ -180,16 +180,16 @@ func (p *InputPrompt) RunWithContext(ctx context.Context) (string, error) {
 	default:
 	}
 
+	// Show help text once (not in loop to avoid spam)
+	fmt.Println()
+	if p.Default != "" {
+		color.Cyan("(Press Enter to use default, or type to override | Ctrl+C: quit)")
+	} else {
+		color.Cyan("(Type your text, press Enter to confirm | Ctrl+C: quit)")
+	}
+	fmt.Println()
+	
 	for {
-		// Show help text
-		fmt.Println()
-		if p.Default != "" {
-			color.Cyan("(Press Enter to use default, or type to override | Ctrl+C: quit)")
-		} else {
-			color.Cyan("(Type your text, press Enter to confirm | Ctrl+C: quit)")
-		}
-		fmt.Println()
-		
 		// Create promptui prompt
 		prompt := promptui.Prompt{
 			Label:   p.Label,
