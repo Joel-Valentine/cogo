@@ -67,27 +67,27 @@ func (p *SelectPrompt) RunWithContext(ctx context.Context) (int, string, error) 
 	default:
 	}
 
-	// Add help text to label if not hidden
-	label := p.Label
-	if !p.HideHelp && p.defaultHelp != "" {
-		label = fmt.Sprintf("%s (%s)", label, p.defaultHelp)
-	}
-
 	// Create custom templates to show our help text
+	// Note: We use templates instead of adding help to the label to avoid duplication
 	templates := &promptui.SelectTemplates{
 		Label:    "{{ . }}",
 		Active:   "▸ {{ . | cyan }}",
 		Inactive: "  {{ . }}",
 		Selected: "✔ {{ . | green }}",
-		Help:     "Use arrow keys to navigate: ↑ ↓  |  Select: Enter  |  Back: Esc or 'q'  |  Cancel: Ctrl+C",
+	}
+	
+	// Only add help if not hidden
+	if !p.HideHelp {
+		templates.Help = "↑↓: Navigate | Enter: Select | Esc/q: Back | Ctrl+C: Cancel"
 	}
 	
 	// Create promptui select
 	prompt := promptui.Select{
-		Label:     label,
+		Label:     p.Label,
 		Items:     p.Items,
 		Templates: templates,
 		CursorPos: p.cursorPos,
+		Size:      10, // Limit visible items to reduce flickering
 	}
 
 	if p.Searcher != nil {
