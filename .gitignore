@@ -1,3 +1,4 @@
 bin
 vendor
 .cogo_config.json
+.cursor/
