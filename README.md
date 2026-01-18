@@ -31,17 +31,77 @@ Find the latest release in releases for your machines architecture, download and
 
 ### Configuration
 
+Cogo uses a modern, secure credential management system with multiple storage options.
+
+#### 🔐 Secure Storage (Recommended)
+
+Store your DigitalOcean API token securely in your OS keychain:
+
+```bash
+cogo config set-token
+```
+
+Your token will be stored in:
+- **macOS**: Keychain
+- **Windows**: Credential Manager
+- **Linux**: Secret Service (GNOME Keyring, KWallet, etc.)
+
+#### 🌍 Environment Variables
+
+For CI/CD or automation, use environment variables:
+
+```bash
+export DIGITALOCEAN_TOKEN=dop_v1_xxx
+cogo create
+```
+
+Supported environment variables (in priority order):
+- `DIGITALOCEAN_TOKEN` (standard DigitalOcean env var)
+- `COGO_DIGITALOCEAN_TOKEN` (cogo-specific)
+
+#### 📁 Legacy File Configuration (Deprecated)
+
+Cogo still supports the legacy `.cogo` JSON file for backward compatibility:
+
+Locations checked (in order):
 1. `$HOME/.cogo`
-1. `$HOME/.config/.cogo`
-1. `./.cogo`
+2. `$HOME/.config/.cogo`
+3. `./.cogo`
 
-Cogo will look for a file called **`.cogo`**. The file needs to be of **`json`** format.
+**⚠️ Warning**: File storage is insecure (plain text). Migrate to keychain:
 
-Current supported config locations are `$HOME/`, `$HOME/.config/` and `./`
+```bash
+cogo config migrate
+```
 
-See the `sample_config.json` file as a basis.
+#### Priority Order
 
-> It isn't necessary to add the config as cogo will ask you for tokens without a config
+Cogo checks for credentials in this order:
+1. Command-line flag: `--token`
+2. Environment variable: `DIGITALOCEAN_TOKEN`
+3. Environment variable: `COGO_DIGITALOCEAN_TOKEN`
+4. OS Keychain (secure)
+5. Config file (legacy)
+6. Interactive prompt
+
+#### Configuration Commands
+
+```bash
+# Set token (stores in keychain)
+cogo config set-token
+
+# View current token (masked)
+cogo config get-token
+
+# Check configuration status
+cogo config status
+
+# Migrate from file to keychain
+cogo config migrate
+
+# Delete stored token
+cogo config delete-token
+```
 
 ## Usage
 
