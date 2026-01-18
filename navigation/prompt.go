@@ -275,22 +275,11 @@ func (p *ConfirmPrompt) RunWithContext(ctx context.Context) (bool, error) {
 		label += " (y/N)"
 	}
 
-	// Create promptui prompt
+	// Create promptui prompt (NO per-keystroke validation to avoid spam)
 	prompt := promptui.Prompt{
 		Label:   label,
 		Default: "",
 	}
-
-	// Validation function
-	validate := func(input string) error {
-		input = strings.ToLower(strings.TrimSpace(input))
-		if input == "" || input == "y" || input == "yes" || input == "n" || input == "no" {
-			return nil
-		}
-		return fmt.Errorf("please enter 'y' or 'n'")
-	}
-
-	prompt.Validate = validate
 
 	for {
 		result, err := prompt.Run()
