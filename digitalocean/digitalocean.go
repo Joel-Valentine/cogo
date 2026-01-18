@@ -6,13 +6,12 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"github.com/Joel-Valentine/cogo/config"
+	"github.com/Joel-Valentine/cogo/credentials"
 	"github.com/Joel-Valentine/cogo/utils"
 	"github.com/digitalocean/godo"
 	"github.com/fatih/color"
 	"github.com/manifoldco/promptui"
 	"strconv"
-	"strings"
 )
 
 var imageFork = []utils.SelectItem{{Name: "Distributions", Value: "D"}, {Name: "Applications", Value: "A"}, {Name: "Custom", Value: "C"}}
@@ -250,37 +249,60 @@ func DestroyDroplet() (*utils.SelectItem, error) {
 	return &selectedDroplet, nil
 }
 
-// getToken first will check if the digitaloceantoken is present in the config file
-// if not it will ask you to enter the token.
-// Finally it will ask you if you would like to save this to a config file
+// getToken retrieves the DigitalOcean API token using the modern credential manager
+// Priority order: CLI flag → Env var → Keychain → Config file → Interactive prompt
 func getToken() (string, error) {
-	configSetup, err := config.Config()
+	ctx := context.TODO()
 
-	var digitalOceanToken string
+	// Create credential manager with all providers including prompt
+	manager := credentials.NewManager(
+		credentials.NewFlagProvider(""), // Flag support for future use
+		credentials.NewEnvProvider(),
+		credentials.NewKeychainProvider(),
+		credentials.NewFileProvider(),
+		credentials.NewPromptProvider(),
+	)
 
-	// if the error code shows that the config file doesn't exists
-	// ask the user to enter it
-	// ask if they want to save the key to a file
-	if err != nil && err.Code == 01 {
-		promptDigitalOceanToken := promptui.Prompt{
-			Label: "Enter your Digital Ocean API Token",
-			Mask:  '*',
-		}
-
-		token, err := promptDigitalOceanToken.Run()
-
-		if err != nil {
-			fmt.Printf("Token prompt failed %v\n", err)
-			return "", err
-		}
-
-		digitalOceanToken = token
-
-		color.Cyan("Think about saving this to prevent re entering later. Valid locations are: %v", strings.Join(config.PossibleSaveLocations, ", "))
-	} else {
-		digitalOceanToken = configSetup.GetString("digitalOceanToken")
+	token, source, err := manager.GetToken(ctx)
+	if err != nil {
+		return "", fmt.Errorf("failed to get token: %w", err)
 	}
-	return digitalOceanToken, nil
+
+	// If token came from prompt, offer to save it
+	if source.Provider == "prompt" {
+		offerToSaveToken(ctx, token)
+	}
+
+	return token, nil
+}
+
+// offerToSaveToken asks the user if they want to save the token they just entered
+func offerToSaveToken(ctx context.Context, token string) {
+	prompt := promptui.Prompt{
+		Label:     "Save token securely in keychain for future use?",
+		IsConfirm: true,
+	}
+
+	if _, err := prompt.Run(); err != nil {
+		// User declined
+		return
+	}
+
+	// Try keychain first
+	keychainProvider := credentials.NewKeychainProvider()
+	if keychainProvider.Available() {
+		if err := keychainProvider.SetToken(ctx, token); err == nil {
+			color.Green("✓ Token saved securely in keychain")
+			return
+		}
+	}
+
+	// Fallback to file if keychain not available
+	color.Yellow("⚠  Keychain not available, using file storage")
+	fileProvider := credentials.NewFileProvider()
+	if err := fileProvider.SetToken(ctx, token); err != nil {
+		color.Red("✗ Failed to save token: %v", err)
+	}
 }
 
 // DisplayDropletList gets all the droplets and formats it with some colours.

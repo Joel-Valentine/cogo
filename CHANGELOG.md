@@ -1,3 +1,38 @@
+## 2.5.0 (2026-01-18)
+
+### 🔐 Security & Features
+
+* **credentials**: Modern secure credential management system
+  - OS keychain integration (macOS Keychain, Windows Credential Manager, Linux Secret Service)
+  - Environment variable support (`DIGITALOCEAN_TOKEN`, `COGO_DIGITALOCEAN_TOKEN`)
+  - Priority-based credential resolution (flag → env → keychain → file → prompt)
+  - Automatic migration from legacy plain-text config files
+  - New `cogo config` commands for credential management
+
+### Commands
+
+* **config set-token**: Store token securely in OS keychain
+* **config get-token**: Display masked token and source
+* **config status**: Show credential configuration status
+* **config migrate**: Migrate from file to keychain storage
+* **config delete-token**: Remove stored credentials
+
+### Security Improvements
+
+* Tokens stored encrypted in OS keychain by default
+* Plain-text file storage deprecated (with warnings)
+* Token masking in all output (shows only first/last 4 chars)
+* Secure token deletion with confirmation prompts
+
+### Migration Notes
+
+* Existing `.cogo` files continue to work (backward compatible)
+* Security warnings displayed when using plain-text storage
+* Easy migration: `cogo config migrate`
+* No breaking changes to existing workflows
+
+---
+
 ## 2.4.0 (2026-01-18)
 
 ### Features
