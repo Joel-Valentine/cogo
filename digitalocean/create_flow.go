@@ -108,11 +108,6 @@ func (s *ImageTypeStep) Execute(ctx context.Context, state navigation.State) (na
 	items := []string{"Distributions", "Applications", "Custom"}
 	prompt := navigation.NewSelectPrompt(s.Prompt(), items)
 
-	// Add back option if we can go back
-	if state.CanGoBack() {
-		prompt = prompt.AddBackOption()
-	}
-
 	index, selected, err := prompt.RunWithContext(ctx)
 	if err != nil {
 		return navigation.Result{}, err
@@ -200,11 +195,6 @@ func (s *ImageSelectionStep) Execute(ctx context.Context, state navigation.State
 
 	prompt := navigation.NewSelectPrompt(s.Prompt(), items)
 
-	// Add back option
-	if state.CanGoBack() {
-		prompt = prompt.AddBackOption()
-	}
-
 	index, _, err := prompt.RunWithContext(ctx)
 	if err != nil {
 		return navigation.Result{}, err
@@ -262,10 +252,6 @@ func (s *SizeSelectionStep) Execute(ctx context.Context, state navigation.State)
 	}
 
 	prompt := navigation.NewSelectPrompt(s.Prompt(), items)
-
-	if state.CanGoBack() {
-		prompt = prompt.AddBackOption()
-	}
 
 	index, _, err := prompt.RunWithContext(ctx)
 	if err != nil {
@@ -325,10 +311,6 @@ func (s *RegionSelectionStep) Execute(ctx context.Context, state navigation.Stat
 
 	prompt := navigation.NewSelectPrompt(s.Prompt(), items)
 
-	if state.CanGoBack() {
-		prompt = prompt.AddBackOption()
-	}
-
 	index, _, err := prompt.RunWithContext(ctx)
 	if err != nil {
 		return navigation.Result{}, err
@@ -386,10 +368,6 @@ func (s *SSHKeySelectionStep) Execute(ctx context.Context, state navigation.Stat
 	}
 
 	prompt := navigation.NewSelectPrompt(s.Prompt(), items)
-
-	if state.CanGoBack() {
-		prompt = prompt.AddBackOption()
-	}
 
 	index, _, err := prompt.RunWithContext(ctx)
 	if err != nil {

@@ -76,11 +76,6 @@ func (s *SelectDropletToDestroyStep) Execute(ctx context.Context, state navigati
 
 	prompt := navigation.NewSelectPrompt(s.Prompt(), items)
 
-	// Add back option if available
-	if state.CanGoBack() {
-		prompt = prompt.AddBackOption()
-	}
-
 	index, _, err := prompt.RunWithContext(ctx)
 	if err != nil {
 		return navigation.Result{}, err
