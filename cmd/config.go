@@ -4,7 +4,7 @@ import (
 	"context"
 	"fmt"
 	"os"
-	
+
 	"github.com/Joel-Valentine/cogo/credentials"
 	"github.com/fatih/color"
 	"github.com/manifoldco/promptui"
@@ -98,7 +98,7 @@ func init() {
 	configCmd.AddCommand(deleteTokenCmd)
 	configCmd.AddCommand(statusCmd)
 	configCmd.AddCommand(migrateCmd)
-	
+
 	// Flags
 	setTokenCmd.Flags().BoolVar(&useKeychain, "keychain", true, "Store in OS keychain (default)")
 	setTokenCmd.Flags().BoolVar(&useFile, "file", false, "Store in config file (not recommended)")
@@ -107,7 +107,7 @@ func init() {
 func runSetToken(cmd *cobra.Command, args []string) error {
 	ctx := context.Background()
 	var token string
-	
+
 	// Get token from args or prompt
 	if len(args) > 0 {
 		token = args[0]
@@ -122,18 +122,18 @@ func runSetToken(cmd *cobra.Command, args []string) error {
 				return nil
 			},
 		}
-		
+
 		var err error
 		token, err = prompt.Run()
 		if err != nil {
 			return fmt.Errorf("failed to read token: %w", err)
 		}
 	}
-	
+
 	// Determine which provider to use
 	var provider credentials.Provider
 	var providerName string
-	
+
 	if useFile {
 		provider = credentials.NewFileProvider()
 		providerName = "file"
@@ -141,26 +141,26 @@ func runSetToken(cmd *cobra.Command, args []string) error {
 		provider = credentials.NewKeychainProvider()
 		providerName = "keychain"
 	}
-	
+
 	// Store the token
 	if err := provider.SetToken(ctx, token); err != nil {
 		return fmt.Errorf("failed to store token: %w", err)
 	}
-	
+
 	color.Green("✓ Token successfully stored in %s", providerName)
-	
+
 	if useFile {
 		color.Yellow("\n⚠️  WARNING: Token stored in plain text file")
 		color.Yellow("   Consider using keychain storage for better security:")
 		color.Yellow("   $ cogo config set-token --keychain\n")
 	}
-	
+
 	return nil
 }
 
 func runGetToken(cmd *cobra.Command, args []string) error {
 	ctx := context.Background()
-	
+
 	manager := createManager("", false)
 	token, source, err := manager.GetToken(ctx)
 	if err != nil {
@@ -172,59 +172,59 @@ func runGetToken(cmd *cobra.Command, args []string) error {
 		}
 		return fmt.Errorf("failed to retrieve token: %w", err)
 	}
-	
+
 	fmt.Printf("Token: %s\n", credentials.MaskToken(token))
 	fmt.Printf("Source: %s\n", source.Provider)
-	
+
 	if !source.Secure {
 		color.Yellow("\n⚠️  WARNING: Token is stored insecurely")
 		color.Yellow("   Consider migrating to keychain storage:")
 		color.Yellow("   $ cogo config migrate\n")
 	}
-	
+
 	return nil
 }
 
 func runDeleteToken(cmd *cobra.Command, args []string) error {
 	ctx := context.Background()
-	
+
 	// Confirm deletion
 	prompt := promptui.Prompt{
 		Label:     "Are you sure you want to delete your stored token?",
 		IsConfirm: true,
 	}
-	
+
 	if _, err := prompt.Run(); err != nil {
 		fmt.Println("Cancelled")
 		return nil
 	}
-	
+
 	manager := createManager("", false)
 	if err := manager.DeleteToken(ctx); err != nil {
 		return fmt.Errorf("failed to delete token: %w", err)
 	}
-	
+
 	color.Green("✓ Token deleted from all storage locations")
 	return nil
 }
 
 func runStatus(cmd *cobra.Command, args []string) error {
 	ctx := context.Background()
-	
+
 	fmt.Println("Credential Configuration Status")
-	fmt.Println("================================\n")
-	
+	fmt.Println("================================")
+
 	// Check each provider
 	providers := []credentials.Provider{
 		credentials.NewEnvProvider(),
 		credentials.NewKeychainProvider(),
 		credentials.NewFileProvider(),
 	}
-	
+
 	for _, provider := range providers {
 		status := "✗ Not available"
 		var details string
-		
+
 		if provider.Available() {
 			if token, err := provider.GetToken(ctx); err == nil && token != "" {
 				status = "✓ Token found"
@@ -233,14 +233,14 @@ func runStatus(cmd *cobra.Command, args []string) error {
 				status = "○ Available (no token)"
 			}
 		}
-		
+
 		fmt.Printf("%-15s: %s %s\n", provider.Name(), status, details)
 	}
-	
+
 	// Show current effective token
 	fmt.Println("\nEffective Token")
 	fmt.Println("---------------")
-	
+
 	manager := createManager("", false)
 	token, source, err := manager.GetToken(ctx)
 	if err != nil {
@@ -254,7 +254,7 @@ func runStatus(cmd *cobra.Command, args []string) error {
 	} else {
 		fmt.Printf("Token: %s\n", credentials.MaskToken(token))
 		fmt.Printf("Source: %s\n", source.Provider)
-		
+
 		if !source.Secure {
 			color.Yellow("\n⚠️  WARNING: Using insecure storage")
 			color.Yellow("   Run 'cogo config migrate' to upgrade\n")
@@ -262,7 +262,7 @@ func runStatus(cmd *cobra.Command, args []string) error {
 			color.Green("✓ Using secure storage")
 		}
 	}
-	
+
 	// Show environment variable info
 	fmt.Println("\nEnvironment Variables")
 	fmt.Println("--------------------")
@@ -276,16 +276,16 @@ func runStatus(cmd *cobra.Command, args []string) error {
 	} else {
 		fmt.Println("COGO_DIGITALOCEAN_TOKEN: Not set")
 	}
-	
+
 	return nil
 }
 
 func runMigrate(cmd *cobra.Command, args []string) error {
 	ctx := context.Background()
-	
+
 	fileProvider := credentials.NewFileProvider()
 	keychainProvider := credentials.NewKeychainProvider()
-	
+
 	// Check if keychain is available
 	if !keychainProvider.Available() {
 		color.Red("✗ OS keychain is not available on this system")
@@ -293,33 +293,33 @@ func runMigrate(cmd *cobra.Command, args []string) error {
 		fmt.Println("  export DIGITALOCEAN_TOKEN=your_token_here")
 		return nil
 	}
-	
+
 	// Check if file has token
 	if !fileProvider.Available() {
 		color.Yellow("No config file found to migrate")
 		return nil
 	}
-	
+
 	token, err := fileProvider.GetToken(ctx)
 	if err != nil {
 		return fmt.Errorf("failed to read token from file: %w", err)
 	}
-	
+
 	fmt.Printf("Found token in file: %s\n", credentials.MaskToken(token))
-	
+
 	// Store in keychain
 	if err := keychainProvider.SetToken(ctx, token); err != nil {
 		return fmt.Errorf("failed to store token in keychain: %w", err)
 	}
-	
+
 	color.Green("✓ Token successfully stored in keychain")
-	
+
 	// Ask if they want to delete the file
 	prompt := promptui.Prompt{
 		Label:     "Delete the plain-text config file?",
 		IsConfirm: true,
 	}
-	
+
 	if _, err := prompt.Run(); err == nil {
 		if err := fileProvider.DeleteToken(ctx); err != nil {
 			color.Yellow("⚠  Failed to delete config file: %v", err)
@@ -330,10 +330,10 @@ func runMigrate(cmd *cobra.Command, args []string) error {
 		color.Yellow("⚠  Keeping plain-text config file")
 		fmt.Println("  You can manually delete it at: ~/.cogo")
 	}
-	
+
 	color.Green("\n✓ Migration complete!")
 	fmt.Println("Your token is now stored securely in your OS keychain.")
-	
+
 	return nil
 }
 
@@ -347,11 +347,10 @@ func createManager(flagToken string, includePrompt bool) *credentials.Manager {
 		credentials.NewKeychainProvider(),
 		credentials.NewFileProvider(),
 	}
-	
+
 	if includePrompt {
 		providers = append(providers, credentials.NewPromptProvider())
 	}
-	
+
 	return credentials.NewManager(providers...)
 }
-

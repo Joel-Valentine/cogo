@@ -14,7 +14,7 @@ func TestMaskToken(t *testing.T) {
 		{
 			name:     "standard token",
 			token:    "fake_token_1234567890abcdefghijklmnopqrstuvwxyz1234567890abcdefghijklmnop",
-			expected: "fake...lmnop",
+			expected: "fake...mnop",
 		},
 		{
 			name:     "short token",
@@ -32,7 +32,7 @@ func TestMaskToken(t *testing.T) {
 			expected: "1234...6789",
 		},
 	}
-	
+
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			result := MaskToken(tt.token)
@@ -45,7 +45,7 @@ func TestMaskToken(t *testing.T) {
 
 func TestManager_GetToken_Priority(t *testing.T) {
 	ctx := context.Background()
-	
+
 	// Create mock providers
 	highPriority := &mockProvider{
 		name:  "high",
@@ -55,18 +55,18 @@ func TestManager_GetToken_Priority(t *testing.T) {
 		name:  "low",
 		token: "low-token",
 	}
-	
+
 	manager := NewManager(highPriority, lowPriority)
-	
+
 	token, source, err := manager.GetToken(ctx)
 	if err != nil {
 		t.Fatalf("unexpected error: %v", err)
 	}
-	
+
 	if token != "high-token" {
 		t.Errorf("expected token from high priority provider, got %q", token)
 	}
-	
+
 	if source.Provider != "high" {
 		t.Errorf("expected source 'high', got %q", source.Provider)
 	}
@@ -74,7 +74,7 @@ func TestManager_GetToken_Priority(t *testing.T) {
 
 func TestManager_GetToken_Fallback(t *testing.T) {
 	ctx := context.Background()
-	
+
 	// Create providers where first one fails
 	failingProvider := &mockProvider{
 		name:      "failing",
@@ -84,18 +84,18 @@ func TestManager_GetToken_Fallback(t *testing.T) {
 		name:  "working",
 		token: "working-token",
 	}
-	
+
 	manager := NewManager(failingProvider, workingProvider)
-	
+
 	token, source, err := manager.GetToken(ctx)
 	if err != nil {
 		t.Fatalf("unexpected error: %v", err)
 	}
-	
+
 	if token != "working-token" {
 		t.Errorf("expected token from working provider, got %q", token)
 	}
-	
+
 	if source.Provider != "working" {
 		t.Errorf("expected source 'working', got %q", source.Provider)
 	}
@@ -103,14 +103,14 @@ func TestManager_GetToken_Fallback(t *testing.T) {
 
 func TestManager_GetToken_NotFound(t *testing.T) {
 	ctx := context.Background()
-	
+
 	emptyProvider := &mockProvider{
 		name:  "empty",
 		token: "",
 	}
-	
+
 	manager := NewManager(emptyProvider)
-	
+
 	_, _, err := manager.GetToken(ctx)
 	if err != ErrTokenNotFound {
 		t.Errorf("expected ErrTokenNotFound, got %v", err)
@@ -119,10 +119,10 @@ func TestManager_GetToken_NotFound(t *testing.T) {
 
 // mockProvider is a test implementation of Provider
 type mockProvider struct {
-	name      string
-	token     string
+	name     string
+	token    string
+	setError error
 	available bool
-	setError  error
 }
 
 func (m *mockProvider) GetToken(ctx context.Context) (string, error) {
@@ -156,4 +156,3 @@ func (m *mockProvider) Available() bool {
 	// Default to available if token is set
 	return m.token != ""
 }
-

@@ -17,16 +17,16 @@ var (
 type Provider interface {
 	// GetToken retrieves the token from this provider
 	GetToken(ctx context.Context) (string, error)
-	
+
 	// SetToken stores the token using this provider
 	SetToken(ctx context.Context, token string) error
-	
+
 	// DeleteToken removes the token from this provider
 	DeleteToken(ctx context.Context) error
-	
+
 	// Name returns a human-readable name for this provider
 	Name() string
-	
+
 	// Available returns true if this provider is available on the system
 	Available() bool
 }
@@ -34,8 +34,8 @@ type Provider interface {
 // Source describes where a token was retrieved from
 type Source struct {
 	Provider string
-	Secure   bool
 	Location string
+	Secure   bool
 }
 
 // Manager orchestrates multiple credential providers with priority ordering
@@ -57,7 +57,7 @@ func (m *Manager) GetToken(ctx context.Context) (string, *Source, error) {
 		if !provider.Available() {
 			continue
 		}
-		
+
 		token, err := provider.GetToken(ctx)
 		if err == nil && token != "" {
 			return token, &Source{
@@ -66,14 +66,14 @@ func (m *Manager) GetToken(ctx context.Context) (string, *Source, error) {
 				Location: provider.Name(),
 			}, nil
 		}
-		
+
 		// Continue to next provider on error
 		if !errors.Is(err, ErrTokenNotFound) && !errors.Is(err, ErrNotSupported) {
 			// Log unexpected errors but continue
 			continue
 		}
 	}
-	
+
 	return "", nil, ErrTokenNotFound
 }
 
@@ -83,11 +83,11 @@ func (m *Manager) SetToken(ctx context.Context, token string, providerName strin
 		if !provider.Available() {
 			continue
 		}
-		
+
 		if providerName != "" && provider.Name() != providerName {
 			continue
 		}
-		
+
 		if err := provider.SetToken(ctx, token); err != nil {
 			if errors.Is(err, ErrNotSupported) {
 				continue
@@ -96,7 +96,7 @@ func (m *Manager) SetToken(ctx context.Context, token string, providerName strin
 		}
 		return nil
 	}
-	
+
 	return errors.New("no writable provider available")
 }
 
@@ -104,12 +104,12 @@ func (m *Manager) SetToken(ctx context.Context, token string, providerName strin
 func (m *Manager) DeleteToken(ctx context.Context) error {
 	var lastErr error
 	deleted := false
-	
+
 	for _, provider := range m.providers {
 		if !provider.Available() {
 			continue
 		}
-		
+
 		if err := provider.DeleteToken(ctx); err != nil {
 			if !errors.Is(err, ErrNotSupported) && !errors.Is(err, ErrTokenNotFound) {
 				lastErr = err
@@ -118,11 +118,11 @@ func (m *Manager) DeleteToken(ctx context.Context) error {
 		}
 		deleted = true
 	}
-	
+
 	if !deleted && lastErr != nil {
 		return lastErr
 	}
-	
+
 	return nil
 }
 
@@ -145,4 +145,3 @@ func MaskToken(token string) string {
 	}
 	return token[:4] + "..." + token[len(token)-4:]
 }
-

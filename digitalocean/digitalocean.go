@@ -253,7 +253,7 @@ func DestroyDroplet() (*utils.SelectItem, error) {
 // Priority order: CLI flag → Env var → Keychain → Config file → Interactive prompt
 func getToken() (string, error) {
 	ctx := context.TODO()
-	
+
 	// Create credential manager with all providers including prompt
 	manager := credentials.NewManager(
 		credentials.NewFlagProvider(""), // Flag support for future use
@@ -262,17 +262,17 @@ func getToken() (string, error) {
 		credentials.NewFileProvider(),
 		credentials.NewPromptProvider(),
 	)
-	
+
 	token, source, err := manager.GetToken(ctx)
 	if err != nil {
 		return "", fmt.Errorf("failed to get token: %w", err)
 	}
-	
+
 	// If token came from prompt, offer to save it
 	if source.Provider == "prompt" {
 		offerToSaveToken(ctx, token)
 	}
-	
+
 	return token, nil
 }
 
@@ -282,12 +282,12 @@ func offerToSaveToken(ctx context.Context, token string) {
 		Label:     "Save token securely in keychain for future use?",
 		IsConfirm: true,
 	}
-	
+
 	if _, err := prompt.Run(); err != nil {
 		// User declined
 		return
 	}
-	
+
 	// Try keychain first
 	keychainProvider := credentials.NewKeychainProvider()
 	if keychainProvider.Available() {
@@ -296,7 +296,7 @@ func offerToSaveToken(ctx context.Context, token string) {
 			return
 		}
 	}
-	
+
 	// Fallback to file if keychain not available
 	color.Yellow("⚠  Keychain not available, using file storage")
 	fileProvider := credentials.NewFileProvider()

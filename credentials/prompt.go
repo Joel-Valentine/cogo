@@ -3,14 +3,14 @@ package credentials
 import (
 	"context"
 	"fmt"
-	
+
 	"github.com/manifoldco/promptui"
 )
 
 // PromptProvider retrieves tokens interactively from user input
 type PromptProvider struct {
-	prompted bool
 	token    string
+	prompted bool
 }
 
 // NewPromptProvider creates a new interactive prompt credential provider
@@ -23,7 +23,7 @@ func (p *PromptProvider) GetToken(ctx context.Context) (string, error) {
 	if p.prompted {
 		return p.token, nil
 	}
-	
+
 	prompt := promptui.Prompt{
 		Label: "Enter your DigitalOcean API Token",
 		Mask:  '*',
@@ -34,15 +34,15 @@ func (p *PromptProvider) GetToken(ctx context.Context) (string, error) {
 			return nil
 		},
 	}
-	
+
 	token, err := prompt.Run()
 	if err != nil {
 		return "", err
 	}
-	
+
 	p.token = token
 	p.prompted = true
-	
+
 	return token, nil
 }
 
@@ -65,4 +65,3 @@ func (p *PromptProvider) Name() string {
 func (p *PromptProvider) Available() bool {
 	return true
 }
-

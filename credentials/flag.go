@@ -43,4 +43,3 @@ func (p *FlagProvider) Name() string {
 func (p *FlagProvider) Available() bool {
 	return p.token != ""
 }
-

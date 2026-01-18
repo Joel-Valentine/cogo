@@ -3,7 +3,7 @@ package credentials
 import (
 	"context"
 	"errors"
-	
+
 	"github.com/zalando/go-keyring"
 )
 
@@ -58,4 +58,3 @@ func (p *KeychainProvider) Available() bool {
 	_, err := keyring.Get(keychainService, "_cogo_availability_test")
 	return err == nil || errors.Is(err, keyring.ErrNotFound)
 }
-

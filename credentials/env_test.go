@@ -8,7 +8,7 @@ import (
 
 func TestEnvProvider_GetToken(t *testing.T) {
 	ctx := context.Background()
-	
+
 	// Save original env vars
 	originalDO := os.Getenv("DIGITALOCEAN_TOKEN")
 	originalCogo := os.Getenv("COGO_DIGITALOCEAN_TOKEN")
@@ -16,7 +16,7 @@ func TestEnvProvider_GetToken(t *testing.T) {
 		os.Setenv("DIGITALOCEAN_TOKEN", originalDO)
 		os.Setenv("COGO_DIGITALOCEAN_TOKEN", originalCogo)
 	}()
-	
+
 	tests := []struct {
 		name          string
 		doToken       string
@@ -52,15 +52,15 @@ func TestEnvProvider_GetToken(t *testing.T) {
 			expectError: true,
 		},
 	}
-	
+
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			os.Setenv("DIGITALOCEAN_TOKEN", tt.doToken)
 			os.Setenv("COGO_DIGITALOCEAN_TOKEN", tt.cogoToken)
-			
+
 			provider := NewEnvProvider()
 			token, err := provider.GetToken(ctx)
-			
+
 			if tt.expectError {
 				if err == nil {
 					t.Error("expected error, got nil")
@@ -80,7 +80,7 @@ func TestEnvProvider_GetToken(t *testing.T) {
 func TestEnvProvider_SetToken_NotSupported(t *testing.T) {
 	ctx := context.Background()
 	provider := NewEnvProvider()
-	
+
 	err := provider.SetToken(ctx, "test-token")
 	if err != ErrNotSupported {
 		t.Errorf("expected ErrNotSupported, got %v", err)
@@ -91,7 +91,7 @@ func TestEnvProvider_Available(t *testing.T) {
 	// Save original env vars
 	originalDO := os.Getenv("DIGITALOCEAN_TOKEN")
 	defer os.Setenv("DIGITALOCEAN_TOKEN", originalDO)
-	
+
 	tests := []struct {
 		name      string
 		token     string
@@ -108,18 +108,17 @@ func TestEnvProvider_Available(t *testing.T) {
 			available: false,
 		},
 	}
-	
+
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			os.Setenv("DIGITALOCEAN_TOKEN", tt.token)
-			
+
 			provider := NewEnvProvider()
 			available := provider.Available()
-			
+
 			if available != tt.available {
 				t.Errorf("expected Available() = %v, got %v", tt.available, available)
 			}
 		})
 	}
 }
-

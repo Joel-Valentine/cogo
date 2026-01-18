@@ -56,4 +56,3 @@ func (p *EnvProvider) Available() bool {
 	}
 	return false
 }
-
