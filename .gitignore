@@ -4,3 +4,6 @@ vendor
 .cursor/
 .cogo.json
 .cogo
+
+# Compiled binary
+cogo
