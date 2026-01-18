@@ -46,8 +46,8 @@ type Step interface {
 	// - error: Fatal error only (validation errors should re-prompt internally)
 	//
 	// Special errors:
-	// - ErrGoBack: User pressed 'b' or ←
-	// - ErrCancel: User pressed 'q' or Esc
+	// - ErrGoBack: User selected "← Back" option
+	// - ErrCancel: Operation canceled
 	// - context.Canceled: User pressed Ctrl+C
 	// - ErrEmptyState: No resources available (not fatal)
 	Execute(ctx context.Context, state State) (Result, error)

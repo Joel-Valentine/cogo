@@ -12,9 +12,9 @@ import (
 
 // SelectPrompt wraps promptui.Select with navigation support.
 // Handles:
-// - Back navigation ('b' or ← key)
-// - Quit/cancel ('q' or Esc)
+// - Back navigation via "← Back" option selection
 // - Ctrl+C (context cancellation)
+// - Arrow key navigation
 // - Invalid key silently ignored (no spam)
 type SelectPrompt struct {
 	Label       string
@@ -31,7 +31,7 @@ func NewSelectPrompt(label string, items []string) *SelectPrompt {
 		Label:       label,
 		Items:       items,
 		HideHelp:    false,
-		defaultHelp: "Use arrow keys, Enter to select, Esc or 'q' to quit, Ctrl+C to cancel",
+		defaultHelp: "Use arrow keys to navigate, Enter to select, Ctrl+C to cancel",
 	}
 }
 
@@ -184,9 +184,9 @@ func (p *InputPrompt) RunWithContext(ctx context.Context) (string, error) {
 		// Show help text
 		fmt.Println()
 		if p.Default != "" {
-			color.Cyan("(Press Enter to use default, or type to override | Esc: cancel | Ctrl+C: quit)")
+			color.Cyan("(Press Enter to use default, or type to override | Ctrl+C: quit)")
 		} else {
-			color.Cyan("(Type your text, press Enter to confirm, Esc to cancel, Ctrl+C to quit)")
+			color.Cyan("(Type your text, press Enter to confirm | Ctrl+C: quit)")
 		}
 		fmt.Println()
 		
@@ -215,8 +215,8 @@ func (p *InputPrompt) RunWithContext(ctx context.Context) (string, error) {
 				return "", context.Canceled
 			}
 
-			// EOF (Ctrl+D) or Esc
-			if errors.Is(err, promptui.ErrEOF) || strings.Contains(errStr, "EOF") || strings.Contains(errStr, "esc") {
+			// EOF (Ctrl+D)
+			if errors.Is(err, promptui.ErrEOF) || strings.Contains(errStr, "EOF") {
 				return "", ErrCancel
 			}
 

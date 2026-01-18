@@ -5,9 +5,9 @@
 Create, list, and destroy cloud resources with an intelligent CLI that supports back navigation, graceful empty state handling, and consistent keyboard shortcuts across all operations.
 
 **Features**:
-- 🔙 **Back Navigation** - Go back and change selections (inspired by gcloud)
+- 🔙 **Back Navigation** - Go back and change selections with "← Back" option
 - 🎯 **Smart Empty State Handling** - No crashes, only helpful messages
-- ⌨️ **Universal Keyboard Shortcuts** - Ctrl+C, Esc, 'b' for back, 'q' to quit
+- ⌨️ **Simple Navigation** - Arrow keys and Enter for all interactions
 - 🎨 **Colored Output** - ✓ success, ✗ error, ⚠️ warning
 - 🔐 **Secure Credentials** - OS keychain integration
 - 📝 **Multi-step Flows** - Guided wizards with state preservation
@@ -113,17 +113,16 @@ cogo config delete-token
 
 ## Usage
 
-### Keyboard Shortcuts
+### Navigation
 
-**Universal shortcuts work in all commands**:
+**How to navigate in all commands**:
 
-| Key | Action |
-|-----|--------|
-| **Ctrl+C** | Cancel immediately |
-| **Esc** or **q** | Quit current operation |
-| **b** or **←** | Go back to previous step |
-| **↑** / **↓** | Navigate lists |
-| **Enter** | Confirm / Continue |
+| Action | How |
+|--------|-----|
+| **Navigate lists** | Use **↑** / **↓** arrow keys |
+| **Select / Confirm** | Press **Enter** |
+| **Go back** | Select **"← Back"** option (shown at top of lists) |
+| **Cancel completely** | Press **Ctrl+C** |
 
 ### create
 
