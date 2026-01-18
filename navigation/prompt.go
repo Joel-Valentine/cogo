@@ -275,6 +275,10 @@ func (p *ConfirmPrompt) RunWithContext(ctx context.Context) (bool, error) {
 		defaultIndex = 1
 	}
 
+	// Show the question separately to avoid promptui label duplication issues
+	color.Yellow(p.Label)
+	fmt.Println()
+	
 	// Show help once before prompt (not in template to avoid duplication)
 	if !p.HideHelp {
 		color.Cyan("(↑↓ to navigate, Enter to select, Ctrl+C to cancel)")
@@ -282,7 +286,7 @@ func (p *ConfirmPrompt) RunWithContext(ctx context.Context) (bool, error) {
 	}
 
 	prompt := promptui.Select{
-		Label:     p.Label,
+		Label:     "Select", // Simple label to avoid duplication
 		Items:     items,
 		CursorPos: defaultIndex,
 		Size:      2,
