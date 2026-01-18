@@ -69,9 +69,8 @@ func (p *FileProvider) SetToken(ctx context.Context, token string) error {
 	// Read existing config if it exists
 	config := make(map[string]interface{})
 	if data, readErr := os.ReadFile(configPath); readErr == nil {
-		if unmarshalErr := json.Unmarshal(data, &config); unmarshalErr != nil {
-			// Ignore unmarshal errors for existing files, we'll overwrite
-		}
+		// Ignore unmarshal errors for existing files, we'll overwrite
+		_ = json.Unmarshal(data, &config)
 	}
 
 	// Update token
