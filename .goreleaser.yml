@@ -1,0 +1,98 @@
+before:
+  hooks:
+    - go mod tidy
+    - go mod download
+
+builds:
+  - id: cogo
+    binary: cogo
+    env:
+      - CGO_ENABLED=0
+    goos:
+      - linux
+      - darwin
+      - windows
+    goarch:
+      - amd64
+      - arm64
+    ldflags:
+      - -s -w
+      - -X github.com/Joel-Valentine/cogo/version.GitCommit={{.Commit}}
+      - -X github.com/Joel-Valentine/cogo/version.BuildDate={{.Date}}
+    ignore:
+      - goos: windows
+        goarch: arm64
+
+archives:
+  - id: cogo
+    name_template: >-
+      {{ .ProjectName }}_
+      {{- .Version }}_
+      {{- title .Os }}_
+      {{- if eq .Arch "amd64" }}x86_64
+      {{- else if eq .Arch "386" }}i386
+      {{- else }}{{ .Arch }}{{ end }}
+    format_overrides:
+      - goos: windows
+        format: zip
+    files:
+      - README.md
+      - LICENSE
+      - CHANGELOG.md
+
+checksum:
+  name_template: 'checksums.txt'
+
+snapshot:
+  name_template: "{{ incpatch .Version }}-next"
+
+changelog:
+  sort: asc
+  use: github
+  filters:
+    exclude:
+      - '^docs:'
+      - '^test:'
+      - '^chore:'
+      - Merge pull request
+      - Merge branch
+  groups:
+    - title: 'Features'
+      regexp: "^.*feat[(\\w)]*:+.*$"
+      order: 0
+    - title: 'Bug fixes'
+      regexp: "^.*fix[(\\w)]*:+.*$"
+      order: 1
+    - title: 'Dependencies'
+      regexp: "^.*deps[(\\w)]*:+.*$"
+      order: 2
+    - title: 'Others'
+      order: 999
+
+release:
+  github:
+    owner: Joel-Valentine
+    name: cogo
+  draft: false
+  prerelease: auto
+  name_template: "{{.ProjectName}} v{{.Version}}"
+  header: |
+    ## Release Notes
+    
+    Thanks for using cogo! This release includes the following changes:
+  footer: |
+    ## Installation
+    
+    ### Homebrew (macOS/Linux)
+    ```bash
+    brew install Joel-Valentine/tap/cogo
+    ```
+    
+    ### Binary Download
+    Download the appropriate binary for your platform from the assets below.
+    
+    ### Go Install
+    ```bash
+    go install github.com/Joel-Valentine/cogo@v{{.Version}}
+    ```
+
