@@ -196,7 +196,11 @@ func (p *InputPrompt) RunWithContext(ctx context.Context) (string, error) {
 	for {
 		// Show help text
 		fmt.Println()
-		color.Cyan("(Type your text, press Enter to confirm, Esc to cancel, Ctrl+C to quit)")
+		if p.Default != "" {
+			color.Cyan("(Press Enter to use default, or type to override | Esc: cancel | Ctrl+C: quit)")
+		} else {
+			color.Cyan("(Type your text, press Enter to confirm, Esc to cancel, Ctrl+C to quit)")
+		}
 		fmt.Println()
 		
 		// Create promptui prompt
