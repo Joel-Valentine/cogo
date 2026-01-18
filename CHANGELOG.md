@@ -1,6 +1,32 @@
-##  (2020-04-12)
+## 2.4.0 (2026-01-18)
 
-* chore: updating to v1.0 ([403ac7e](https://github.com/Midnight-Conqueror/cogo/commit/403ac7e))
+### Features
+
+* **dependencies**: Modernize DigitalOcean API integration
+  - Update godo SDK from v1.34.0 (2020) to v1.130.0 (2026)
+  - Update Cobra CLI framework from v0.0.7 to v1.8.1
+  - Update Viper config library from v1.6.3 to v1.19.0
+  - Update promptui from v0.7.0 to v0.9.0
+  - Update fatih/color from v1.9.0 to v1.18.0
+  - Upgrade to Go 1.24
+
+### Improvements
+
+* **api**: Access to all current DigitalOcean regions, images, and droplet sizes
+* **compatibility**: Maintains full backward compatibility with existing configuration files
+* **performance**: Benefits from 6 years of godo SDK improvements and bug fixes
+
+### Migration Notes
+
+* No breaking changes - existing `.cogo` configuration files work without modification
+* All existing commands (`create`, `list`, `destroy`) work identically
+* Automatically supports new DigitalOcean features via updated API
+
+---
+
+## 2.3.1 (2020-04-12)
+
+* chore: updating to v1.0 ([403ac7e](https://github.com/Joel-Valentine/cogo/commit/403ac7e))
 * chore: v1.1 ([e15899d](https://github.com/Midnight-Conqueror/cogo/commit/e15899d))
 * feat(digitalocean): Can now destroy droplets with lots of checks ([af01618](https://github.com/Midnight-Conqueror/cogo/commit/af01618))
 * refactor(digitalocean): Moved some of the repitition to seperate functions so its easier to read ([de4696b](https://github.com/Midnight-Conqueror/cogo/commit/de4696b))
