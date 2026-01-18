@@ -28,7 +28,6 @@ var imageFork = []utils.SelectItem{{Name: "Distributions", Value: "D"}, {Name: "
 // 7. Asks if you are sure with a y/n answer. It will not create a droplet if you chose n
 // Finally the droplet is created and returned
 func CreateDroplet() (*godo.Droplet, error) {
-
 	digitalOceanToken, tokenError := getToken()
 
 	if tokenError != nil {
@@ -175,10 +174,6 @@ func DestroyDroplet() (*utils.SelectItem, error) {
 
 	selectedDroplet := selectItemDroplets[selectedDropletIndex]
 
-	if err != nil {
-		return nil, err
-	}
-
 	selectedDropletID, err := strconv.Atoi(selectedDroplet.Value)
 
 	if err != nil {
@@ -282,11 +277,6 @@ func getToken() (string, error) {
 		digitalOceanToken = token
 
 		color.Cyan("Think about saving this to prevent re entering later. Valid locations are: %v", strings.Join(config.PossibleSaveLocations, ", "))
-
-		if err != nil {
-			fmt.Printf("Save Token prompt failed %v\n", err)
-			return "", err
-		}
 	} else {
 		digitalOceanToken = configSetup.GetString("digitalOceanToken")
 	}
@@ -339,9 +329,7 @@ func dropletList(ctx context.Context, client *godo.Client) ([]godo.Droplet, erro
 		}
 
 		// append the current page's droplets to our list
-		for _, d := range droplets {
-			list = append(list, d)
-		}
+		list = append(list, droplets...)
 
 		// if we are at the last page, break out the for loop
 		if resp.Links == nil || resp.Links.IsLastPage() {
@@ -374,9 +362,7 @@ func regionList(ctx context.Context, client *godo.Client) ([]utils.SelectItem, e
 		}
 
 		// append the current page's regions to our list
-		for _, d := range regions {
-			list = append(list, d)
-		}
+		list = append(list, regions...)
 
 		// if we are at the last page, break out the for loop
 		if resp.Links == nil || resp.Links.IsLastPage() {
@@ -397,42 +383,6 @@ func regionList(ctx context.Context, client *godo.Client) ([]utils.SelectItem, e
 	return selectList, nil
 }
 
-// imageList will return a list all of the available images using the godo client
-func imageList(ctx context.Context, client *godo.Client) ([]utils.SelectItem, error) {
-	// create a list to hold our droplets
-	list := []godo.Image{}
-
-	// create options. initially, these will be blank
-	opt := &godo.ListOptions{}
-	for {
-		images, resp, err := client.Images.List(ctx, opt)
-		if err != nil {
-			return nil, err
-		}
-
-		// append the current page's regions to our list
-		for _, d := range images {
-			list = append(list, d)
-		}
-
-		// if we are at the last page, break out the for loop
-		if resp.Links == nil || resp.Links.IsLastPage() {
-			break
-		}
-
-		page, err := resp.Links.CurrentPage()
-		if err != nil {
-			return nil, err
-		}
-
-		// set the page we want for the next request
-		opt.Page = page + 1
-	}
-
-	selectList := utils.ParseImageListResults(list)
-
-	return selectList, nil
-}
 
 // sizeList will return a list of sizes using the godo client
 func sizeList(ctx context.Context, client *godo.Client) ([]utils.SelectItem, error) {
@@ -447,10 +397,8 @@ func sizeList(ctx context.Context, client *godo.Client) ([]utils.SelectItem, err
 			return nil, err
 		}
 
-		// append the current page's regions to our list
-		for _, d := range images {
-			list = append(list, d)
-		}
+		// append the current page's images to our list
+		list = append(list, images...)
 
 		// if we are at the last page, break out the for loop
 		if resp.Links == nil || resp.Links.IsLastPage() {
@@ -484,10 +432,8 @@ func imageDistributionList(ctx context.Context, client *godo.Client) ([]utils.Se
 			return nil, err
 		}
 
-		// append the current page's regions to our list
-		for _, d := range images {
-			list = append(list, d)
-		}
+		// append the current page's images to our list
+		list = append(list, images...)
 
 		// if we are at the last page, break out the for loop
 		if resp.Links == nil || resp.Links.IsLastPage() {
@@ -521,10 +467,8 @@ func imageApplicationList(ctx context.Context, client *godo.Client) ([]utils.Sel
 			return nil, err
 		}
 
-		// append the current page's regions to our list
-		for _, d := range images {
-			list = append(list, d)
-		}
+		// append the current page's images to our list
+		list = append(list, images...)
 
 		// if we are at the last page, break out the for loop
 		if resp.Links == nil || resp.Links.IsLastPage() {
@@ -558,10 +502,8 @@ func imageCustomList(ctx context.Context, client *godo.Client) ([]utils.SelectIt
 			return nil, err
 		}
 
-		// append the current page's regions to our list
-		for _, d := range images {
-			list = append(list, d)
-		}
+		// append the current page's images to our list
+		list = append(list, images...)
 
 		// if we are at the last page, break out the for loop
 		if resp.Links == nil || resp.Links.IsLastPage() {
@@ -595,10 +537,8 @@ func sshKeyList(ctx context.Context, client *godo.Client) ([]utils.SelectItem, e
 			return nil, err
 		}
 
-		// append the current page's regions to our list
-		for _, d := range images {
-			list = append(list, d)
-		}
+		// append the current page's images to our list
+		list = append(list, images...)
 
 		// if we are at the last page, break out the for loop
 		if resp.Links == nil || resp.Links.IsLastPage() {
@@ -732,27 +672,6 @@ func getSelectedImageDistributionSlug(ctx context.Context, client *godo.Client) 
 	return selectedImage, nil
 }
 
-// getSelectedImageSlug is deprecated for now
-// will get all the available images
-// asks the use to chose one
-// returns the chosen image slug (ubuntu-19-10-x64)
-func getSelectedImageSlug(ctx context.Context, client *godo.Client) (string, error) {
-	imageList, imageListError := imageList(ctx, client)
-
-	if imageListError != nil {
-		fmt.Printf("Something bad happened getting image list: %s\n\n", imageListError)
-		return "", imageListError
-	}
-
-	selectedImage, err := utils.AskAndAnswerCustomSelect("Image Select", imageList)
-
-	if err != nil {
-		fmt.Printf("Failed to ask image question, %s", err)
-		return "", err
-	}
-
-	return selectedImage, nil
-}
 
 // getSelectedCustomImageSlug will get all the available images
 // asks the use to chose one

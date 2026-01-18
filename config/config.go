@@ -30,7 +30,7 @@ type Provider interface {
 
 // Configurations is the structure of the config file
 type Configurations struct {
-	digitalOceanAPIToken string
+	// Configuration fields can be added here as needed
 }
 
 // PossibleSaveLocations is a list of all locations that is currently supported
