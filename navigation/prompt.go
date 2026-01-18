@@ -275,15 +275,18 @@ func (p *ConfirmPrompt) RunWithContext(ctx context.Context) (bool, error) {
 		defaultIndex = 1
 	}
 
+	// Show help once before prompt (not in template to avoid duplication)
+	if !p.HideHelp {
+		color.Cyan("(↑↓ to navigate, Enter to select, Ctrl+C to cancel)")
+		fmt.Println()
+	}
+
 	prompt := promptui.Select{
 		Label:     p.Label,
 		Items:     items,
 		CursorPos: defaultIndex,
 		Size:      2,
-		HideHelp:  p.HideHelp,
-		Templates: &promptui.SelectTemplates{
-			Help: "{{ \"↑↓: Navigate | Enter: Confirm | Ctrl+C: Cancel\" | faint }}",
-		},
+		HideHelp:  true, // Always hide built-in help to prevent duplication
 	}
 
 	_, result, err := prompt.Run()
