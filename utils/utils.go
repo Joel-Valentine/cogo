@@ -4,6 +4,7 @@ import (
 	"errors"
 	"strconv"
 	"strings"
+	"time"
 
 	"github.com/digitalocean/godo"
 	"github.com/manifoldco/promptui"
@@ -168,4 +169,9 @@ func AskAndAnswerCustomSelect(title string, list []SelectItem) (string, error) {
 	answer, err := GetAnswerFromCustomPrompt(prompt, list)
 
 	return answer, err
+}
+
+// GenerateTimestamp returns the current Unix timestamp as an integer
+func GenerateTimestamp() int64 {
+	return time.Now().Unix()
 }

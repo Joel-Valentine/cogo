@@ -1,11 +1,14 @@
 package cmd
 
 import (
+	"context"
 	"fmt"
 	"os"
 
+	"github.com/Joel-Valentine/cogo/credentials"
 	do "github.com/Joel-Valentine/cogo/digitalocean"
 	"github.com/Joel-Valentine/cogo/utils"
+	"github.com/digitalocean/godo"
 	"github.com/fatih/color"
 	"github.com/spf13/cobra"
 )
@@ -43,24 +46,38 @@ var create = &cobra.Command{
 
 		if err != nil {
 			color.Yellow("Something went wrong asking for selected provider\n")
-			color.Cyan("List your droplets in a couple of minutes to see the IP\n")
 			return
 		}
 
 		if selectedProvider == "DO" {
-			createdDroplet, createDropletError := do.CreateDroplet()
+			// Get DigitalOcean API token
+			ctx := context.Background()
+			credManager := credentials.NewManager() // Uses default providers
+			token, _, err := credManager.GetToken(ctx)
+			if err != nil {
+				color.Red("✗ Error: Unable to get DigitalOcean API token\n")
+				fmt.Println()
+				fmt.Println("Run 'cogo config set-token' to configure your token.")
+				return
+			}
+
+			// Create client
+			client := godo.NewFromToken(token)
+
+			// Execute create flow with back navigation support
+			createdDroplet, createDropletError := do.ExecuteCreateFlow(client)
 
 			if createDropletError != nil {
-				color.Cyan("Aborted, droplet was not created\n")
+				color.Red("✗ Error: %v\n", createDropletError)
 				return
 			}
 
 			if createdDroplet == nil {
-				color.Cyan("Aborted, droplet was not created\n")
+				// Canceled or empty state (message already shown)
 				return
 			}
 
-			color.Green("Droplet [%s] was created!", createdDroplet.Name)
+			color.Green("✓ Droplet [%s] was created!", createdDroplet.Name)
 			color.Cyan("List your droplets in a couple of minutes to see the IP\n")
 		}
 	},
@@ -90,31 +107,45 @@ var destroy = &cobra.Command{
 	Long: `Will show a list of servers that you currently have in a selected provider, 
 	with the ability to select one and delete/destroy it.
 	
-	Be very careful here. There will be two warnings to make sure that you don't accidentally delete
+	Be very careful here. There will be multiple warnings to make sure that you don't accidentally delete
 	a crucial droplet`,
 	Run: func(cmd *cobra.Command, args []string) {
 		selectedProvider, err := utils.AskForProvider()
 
 		if err != nil {
 			color.Yellow("Something went wrong asking for selected provider\n")
-			color.Cyan("Aborted, Droplet was not destroyed:\n")
 			return
 		}
 
 		if selectedProvider == "DO" {
-			destroyedDroplet, err := do.DestroyDroplet()
+			// Get DigitalOcean API token
+			ctx := context.Background()
+			credManager := credentials.NewManager() // Uses default providers
+			token, _, err := credManager.GetToken(ctx)
+			if err != nil {
+				color.Red("✗ Error: Unable to get DigitalOcean API token\n")
+				fmt.Println()
+				fmt.Println("Run 'cogo config set-token' to configure your token.")
+				return
+			}
+
+			// Create client
+			client := godo.NewFromToken(token)
+
+			// Execute destroy flow with back navigation support
+			destroyedDroplet, err := do.ExecuteDestroyFlow(client)
 
 			if err != nil {
-				color.Cyan("Aborted, Droplet was not destroyed\n")
+				color.Red("✗ Error: %v\n", err)
 				return
 			}
 
 			if destroyedDroplet == nil {
-				color.Cyan("Aborted, droplet was not destroyed\n")
+				// Canceled or empty state (message already shown)
 				return
 			}
 
-			color.Green("Droplet [%s] has been destroyed\n", destroyedDroplet.Name)
+			color.Green("✓ Droplet [%s] has been destroyed\n", destroyedDroplet.Name)
 		}
 	},
 }
