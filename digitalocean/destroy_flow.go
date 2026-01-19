@@ -32,8 +32,7 @@ func NewDestroyDropletFlow(client *godo.Client, droplets []godo.Droplet) *Destro
 	flow.steps = []navigation.Step{
 		&SelectDropletToDestroyStep{droplets: droplets},
 		&ConfirmDestroyStep{},
-		&ReEnterDropletNameStep{droplets: droplets},
-		&FinalConfirmDestroyStep{droplets: droplets},
+		&ReEnterDropletNameStep{droplets: droplets}, // Final confirmation - typing name is enough
 	}
 
 	return flow
@@ -176,12 +175,13 @@ func (s *ReEnterDropletNameStep) Execute(ctx context.Context, state navigation.S
 
 	// Show the droplet name clearly so user can see what to type
 	fmt.Println()
-	color.Yellow("⚠️  DANGER ZONE: You must type the exact droplet name to confirm deletion")
+	color.Red("⚠️  FINAL CONFIRMATION: Type the droplet name and press Enter to DELETE FOREVER")
+	color.Red("⚠️  This action is IRREVERSIBLE - all data will be lost!")
 	fmt.Println()
 	color.Cyan("Droplet name: %s", expectedName)
 	fmt.Println()
 
-	prompt := navigation.NewInputPrompt("Type droplet name to confirm", "")
+	prompt := navigation.NewInputPrompt("Type droplet name to DELETE (pressing Enter will destroy it)", "")
 	enteredName, err := prompt.RunWithContext(ctx)
 	if err != nil {
 		return navigation.Result{}, err
@@ -210,63 +210,6 @@ func (s *ReEnterDropletNameStep) Default() interface{} {
 	return ""
 }
 
-// FinalConfirmDestroyStep shows droplet details and asks for final confirmation
-type FinalConfirmDestroyStep struct {
-	droplets []godo.Droplet
-}
-
-func (s *FinalConfirmDestroyStep) Name() string {
-	return "final_confirm"
-}
-
-func (s *FinalConfirmDestroyStep) Prompt() string {
-	return "Are you really really sure you want to delete this droplet?"
-}
-
-func (s *FinalConfirmDestroyStep) Execute(ctx context.Context, state navigation.State) (navigation.Result, error) {
-	// Get selected droplet
-	dropletResult, _ := state.GetResult("select_droplet")
-	dropletIndex := dropletResult.Metadata["index"].(int)
-	fullDroplet := s.droplets[dropletIndex]
-
-	// Get IP
-	selectedDropletIP, err := fullDroplet.PublicIPv4()
-	if err != nil {
-		selectedDropletIP = "N/A"
-	}
-
-	// Show droplet details
-	fmt.Println()
-	color.Cyan("=== Droplet to be DELETED ===")
-	fmt.Printf("Name:   %s\n", fullDroplet.Name)
-	fmt.Printf("Size:   %s\n", fullDroplet.Size.Slug)
-	fmt.Printf("Region: %s\n", fullDroplet.Region.Name)
-	fmt.Printf("Image:  %s\n", fullDroplet.Image.Name)
-	fmt.Printf("IP:     %s\n", selectedDropletIP)
-	color.Cyan("=============================")
-	fmt.Println()
-
-	prompt := navigation.NewConfirmPrompt(s.Prompt(), false) // Default to No for safety
-	confirmed, err := prompt.RunWithContext(ctx)
-	if err != nil {
-		return navigation.Result{}, err
-	}
-
-	if !confirmed {
-		return navigation.Result{}, navigation.ErrCancel
-	}
-
-	return navigation.NewResult(confirmed), nil
-}
-
-func (s *FinalConfirmDestroyStep) Validate(result navigation.Result) error {
-	return nil
-}
-
-func (s *FinalConfirmDestroyStep) Default() interface{} {
-	return false
-}
-
 // ExecuteDestroyFlow runs the entire destroy droplet flow with back navigation
 func ExecuteDestroyFlow(client *godo.Client) (*utils.SelectItem, error) {
 	ctx := context.Background()
@@ -289,7 +232,7 @@ func ExecuteDestroyFlow(client *godo.Client) (*utils.SelectItem, error) {
 	navigator := navigation.NewNavigator()
 	flow := NewDestroyDropletFlow(client, droplets)
 
-	result, err := navigator.Run(ctx, flow)
+	_, err = navigator.Run(ctx, flow)
 
 	// Handle special cases
 	if err == navigation.ErrEmptyState {
@@ -311,13 +254,7 @@ func ExecuteDestroyFlow(client *godo.Client) (*utils.SelectItem, error) {
 		return nil, fmt.Errorf("destroy flow failed: %w", err)
 	}
 
-	// Check if user confirmed
-	confirmed := result.Value.(bool)
-	if !confirmed {
-		color.Cyan("Droplet destruction canceled.")
-		return nil, nil
-	}
-
+	// User has confirmed by typing the droplet name - proceed with deletion
 	// Extract droplet ID and perform deletion
 	state := flow.State()
 	dropletResult, _ := state.GetResult("select_droplet")
