@@ -37,23 +37,20 @@ type State interface {
 	Back() (int, error)
 }
 
-// state is the concrete implementation of State interface.
 type state struct {
 	history     []StepResult
 	currentStep int
 	maxSteps    int
 }
 
-// NewState creates a new State instance.
 func NewState() State {
 	return &state{
 		history:     make([]StepResult, 0),
 		currentStep: 0,
-		maxSteps:    -1, // No limit by default
+		maxSteps:    -1,
 	}
 }
 
-// NewStateWithMax creates a State with a maximum number of steps.
 func NewStateWithMax(maxSteps int) State {
 	return &state{
 		history:     make([]StepResult, 0, maxSteps),
@@ -63,7 +60,6 @@ func NewStateWithMax(maxSteps int) State {
 }
 
 func (s *state) History() []StepResult {
-	// Return copy to prevent external modification
 	historyCopy := make([]StepResult, len(s.history))
 	copy(historyCopy, s.history)
 	return historyCopy
@@ -90,19 +86,11 @@ func (s *state) AddResult(stepName string, result Result) {
 		Result:   result,
 	}
 
-	// If we're adding a result for the current position:
-	// 1. If we went back, truncate history after current position
-	// 2. Replace/add the result at current position
-	// (This is like git rebase - going back and making changes discards future history)
 	if s.currentStep < len(s.history) {
-		// Truncate history after current position
 		s.history = s.history[:s.currentStep]
 	}
 
-	// Add new result
 	s.history = append(s.history, stepResult)
-
-	// Move to next step
 	s.currentStep++
 }
 

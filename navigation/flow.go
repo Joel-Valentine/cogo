@@ -66,14 +66,12 @@ type Step interface {
 	Default() interface{}
 }
 
-// flow is a concrete implementation of Flow interface.
 type flow struct {
 	name  string
 	steps []Step
 	state State
 }
 
-// NewFlow creates a new Flow with the given name and steps.
 func NewFlow(name string, steps []Step) Flow {
 	return &flow{
 		name:  name,
@@ -82,7 +80,6 @@ func NewFlow(name string, steps []Step) Flow {
 	}
 }
 
-// NewFlowWithState creates a new Flow with existing state (for resuming/testing).
 func NewFlowWithState(name string, steps []Step, state State) Flow {
 	return &flow{
 		name:  name,
@@ -103,8 +100,6 @@ func (f *flow) State() State {
 	return f.state
 }
 
-// SimpleStep is a basic Step implementation for common use cases.
-// For more complex steps, implement the Step interface directly.
 type SimpleStep struct {
 	StepName     string
 	PromptText   string
@@ -130,7 +125,7 @@ func (s *SimpleStep) Execute(ctx context.Context, state State) (Result, error) {
 
 func (s *SimpleStep) Validate(result Result) error {
 	if s.ValidateFunc == nil {
-		return nil // No validation
+		return nil
 	}
 	return s.ValidateFunc(result)
 }

@@ -6,10 +6,8 @@ import (
 	"strings"
 )
 
-// Validator is a function that validates a value and returns an error if invalid.
 type Validator func(interface{}) error
 
-// ValidateRequired checks that a value is not empty.
 func ValidateRequired(fieldName string) Validator {
 	return func(v interface{}) error {
 		if v == nil {
@@ -31,8 +29,6 @@ func ValidateRequired(fieldName string) Validator {
 	}
 }
 
-// ValidateLength checks that a string is within min/max length bounds.
-// Set min or max to -1 to disable that check.
 func ValidateLength(fieldName string, min, max int) Validator {
 	return func(v interface{}) error {
 		str, ok := v.(string)

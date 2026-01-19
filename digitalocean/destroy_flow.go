@@ -11,8 +11,6 @@ import (
 	"github.com/fatih/color"
 )
 
-// DestroyDropletFlow orchestrates the multi-step droplet destruction process
-// with back navigation support.
 type DestroyDropletFlow struct {
 	client   *godo.Client
 	droplets []godo.Droplet
@@ -20,7 +18,6 @@ type DestroyDropletFlow struct {
 	steps    []navigation.Step
 }
 
-// NewDestroyDropletFlow creates a new droplet destruction flow.
 func NewDestroyDropletFlow(client *godo.Client, droplets []godo.Droplet) *DestroyDropletFlow {
 	flow := &DestroyDropletFlow{
 		client:   client,
@@ -50,7 +47,6 @@ func (f *DestroyDropletFlow) State() navigation.State {
 	return f.state
 }
 
-// SelectDropletToDestroyStep asks which droplet to destroy
 type SelectDropletToDestroyStep struct {
 	droplets []godo.Droplet
 }
@@ -114,7 +110,6 @@ func (s *SelectDropletToDestroyStep) Default() interface{} {
 	return nil
 }
 
-// ConfirmDestroyStep asks for initial confirmation
 type ConfirmDestroyStep struct{}
 
 func (s *ConfirmDestroyStep) Name() string {
@@ -155,7 +150,6 @@ func (s *ConfirmDestroyStep) Default() interface{} {
 	return false
 }
 
-// ReEnterDropletNameStep requires user to re-type droplet name
 type ReEnterDropletNameStep struct {
 	droplets []godo.Droplet
 }
@@ -210,7 +204,6 @@ func (s *ReEnterDropletNameStep) Default() interface{} {
 	return ""
 }
 
-// ExecuteDestroyFlow runs the entire destroy droplet flow with back navigation
 func ExecuteDestroyFlow(client *godo.Client) (*utils.SelectItem, error) {
 	ctx := context.Background()
 

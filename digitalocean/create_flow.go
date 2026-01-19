@@ -11,22 +11,18 @@ import (
 	"github.com/fatih/color"
 )
 
-// CreateDropletFlow orchestrates the multi-step droplet creation process
-// with back navigation support.
 type CreateDropletFlow struct {
 	client *godo.Client
 	state  navigation.State
 	steps  []navigation.Step
 }
 
-// NewCreateDropletFlow creates a new droplet creation flow.
 func NewCreateDropletFlow(client *godo.Client) *CreateDropletFlow {
 	flow := &CreateDropletFlow{
 		client: client,
 		state:  navigation.NewState(),
 	}
 
-	// Define all steps in order
 	flow.steps = []navigation.Step{
 		&DropletNameStep{},
 		&ImageTypeStep{},
@@ -52,7 +48,6 @@ func (f *CreateDropletFlow) State() navigation.State {
 	return f.state
 }
 
-// DropletNameStep asks for the droplet name
 type DropletNameStep struct{}
 
 func (s *DropletNameStep) Name() string {
@@ -64,7 +59,6 @@ func (s *DropletNameStep) Prompt() string {
 }
 
 func (s *DropletNameStep) Execute(ctx context.Context, state navigation.State) (navigation.Result, error) {
-	// Check if we already have a value from going back
 	if existing, found := state.GetResult(s.Name()); found {
 		prompt := navigation.NewInputPrompt(s.Prompt(), existing.Value.(string))
 		name, err := prompt.RunWithContext(ctx)
@@ -74,7 +68,6 @@ func (s *DropletNameStep) Execute(ctx context.Context, state navigation.State) (
 		return navigation.NewResult(name), nil
 	}
 
-	// First time - use default
 	defaultName := fmt.Sprintf("my-droplet-%d", utils.GenerateTimestamp())
 	prompt := navigation.NewInputPrompt(s.Prompt(), defaultName)
 	name, err := prompt.RunWithContext(ctx)
@@ -93,7 +86,6 @@ func (s *DropletNameStep) Default() interface{} {
 	return fmt.Sprintf("my-droplet-%d", utils.GenerateTimestamp())
 }
 
-// ImageTypeStep asks which image type (Distributions/Applications/Custom)
 type ImageTypeStep struct{}
 
 func (s *ImageTypeStep) Name() string {
@@ -150,7 +142,6 @@ func (s *ImageTypeStep) Default() interface{} {
 	return "D" // Distributions
 }
 
-// ImageSelectionStep asks for specific image based on type
 type ImageSelectionStep struct {
 	client *godo.Client
 }
@@ -249,7 +240,6 @@ func (s *ImageSelectionStep) Default() interface{} {
 	return nil
 }
 
-// SizeSelectionStep asks for droplet size
 type SizeSelectionStep struct {
 	client *godo.Client
 }
@@ -321,7 +311,6 @@ func (s *SizeSelectionStep) Default() interface{} {
 	return nil
 }
 
-// RegionSelectionStep asks for region
 type RegionSelectionStep struct {
 	client *godo.Client
 }
@@ -393,7 +382,6 @@ func (s *RegionSelectionStep) Default() interface{} {
 	return nil
 }
 
-// SSHKeySelectionStep asks for SSH key
 type SSHKeySelectionStep struct {
 	client *godo.Client
 }
@@ -471,7 +459,6 @@ func (s *SSHKeySelectionStep) Default() interface{} {
 	return nil
 }
 
-// CreateConfirmationStep shows summary and asks for confirmation
 type CreateConfirmationStep struct{}
 
 func (s *CreateConfirmationStep) Name() string {
@@ -519,7 +506,6 @@ func (s *CreateConfirmationStep) Default() interface{} {
 	return true
 }
 
-// ExecuteCreateFlow runs the entire create droplet flow with back navigation
 func ExecuteCreateFlow(client *godo.Client) (*godo.Droplet, error) {
 	ctx := context.Background()
 	navigator := navigation.NewNavigator()
