@@ -118,13 +118,15 @@ func (p *SelectPrompt) RunWithContext(ctx context.Context) (int, string, error) 
 		templates.Help = "↑↓: Navigate | Enter: Select | Ctrl+C: Cancel"
 	}
 	
-	// Create promptui select
+	// Create promptui select with bell/cursor filtering
 	prompt := promptui.Select{
 		Label:     p.Label,
 		Items:     p.Items,
 		Templates: templates,
 		CursorPos: p.cursorPos,
-		Size:      10, // Limit visible items to reduce flickering
+		Size:      10,
+		Stdout:    &bellSkipper{}, // Filter bells and cursor codes
+		Stdin:     os.Stdin,       // Explicitly set
 	}
 
 	if p.Searcher != nil {
@@ -227,11 +229,12 @@ func (p *InputPrompt) RunWithContext(ctx context.Context) (string, error) {
 	fmt.Println()
 	
 	for {
-		// Create promptui prompt
-		prompt := promptui.Prompt{
-			Label:   p.Label,
-			Default: p.Default,
-		}
+	// Create promptui prompt with bell filtering
+	prompt := promptui.Prompt{
+		Label:   p.Label,
+		Default: p.Default,
+		Stdout:  &bellSkipper{}, // Filter bells and cursor codes
+	}
 
 		if p.Mask != 0 {
 			prompt.Mask = p.Mask
@@ -327,8 +330,9 @@ func (p *ConfirmPrompt) RunWithContext(ctx context.Context) (bool, error) {
 		Items:     items,
 		CursorPos: defaultIndex,
 		Size:      2,
-		HideHelp:  true,          // Always hide built-in help to prevent duplication
-		Stdout:    &bellSkipper{}, // Disable bell sound
+		HideHelp:  true,           // Always hide built-in help to prevent duplication
+		Stdout:    &bellSkipper{}, // Filter bells and cursor codes
+		Stdin:     os.Stdin,       // Explicitly set
 	}
 
 	_, result, err := prompt.Run()
