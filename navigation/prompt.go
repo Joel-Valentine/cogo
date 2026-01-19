@@ -4,11 +4,28 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"io"
+	"os"
 	"strings"
 
 	"github.com/fatih/color"
 	"github.com/manifoldco/promptui"
 )
+
+// bellSkipper implements an io.WriteCloser that skips the terminal bell character
+type bellSkipper struct{}
+
+func (bs *bellSkipper) Write(b []byte) (int, error) {
+	const charBell = 7 // bell char
+	if len(b) == 1 && b[0] == charBell {
+		return 0, nil
+	}
+	return os.Stderr.Write(b)
+}
+
+func (bs *bellSkipper) Close() error {
+	return os.Stderr.Close()
+}
 
 // SelectPrompt wraps promptui.Select with navigation support.
 // Handles:
@@ -290,7 +307,8 @@ func (p *ConfirmPrompt) RunWithContext(ctx context.Context) (bool, error) {
 		Items:     items,
 		CursorPos: defaultIndex,
 		Size:      2,
-		HideHelp:  true, // Always hide built-in help to prevent duplication
+		HideHelp:  true,          // Always hide built-in help to prevent duplication
+		Stdout:    &bellSkipper{}, // Disable bell sound
 	}
 
 	_, result, err := prompt.Run()
