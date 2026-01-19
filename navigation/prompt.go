@@ -16,19 +16,31 @@ import (
 type bellSkipper struct{}
 
 func (bs *bellSkipper) Write(b []byte) (int, error) {
-	const charBell = 7 // bell char
-	if len(b) == 1 && b[0] == charBell {
-		return 0, nil
+	const charBell = 7 // bell char (also \a or \007)
+	
+	// Filter out ALL bell characters in any position
+	filtered := make([]byte, 0, len(b))
+	for _, ch := range b {
+		if ch != charBell {
+			filtered = append(filtered, ch)
+		}
 	}
+	
+	// If we filtered out bells, convert to string for escape code filtering
+	s := string(filtered)
 	
 	// Filter out cursor hide/show escape codes that cause flashing
 	// \033[?25l (hide cursor) and \033[?25h (show cursor)
-	s := string(b)
 	if strings.Contains(s, "\033[?25l") || strings.Contains(s, "\033[?25h") {
 		return len(b), nil // Pretend we wrote it, but skip it
 	}
 	
-	return os.Stderr.Write(b)
+	// If nothing left after filtering, don't write
+	if len(filtered) == 0 {
+		return len(b), nil
+	}
+	
+	return os.Stderr.Write(filtered)
 }
 
 func (bs *bellSkipper) Close() error {
