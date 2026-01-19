@@ -12,6 +12,7 @@ import (
 )
 
 // bellSkipper implements an io.WriteCloser that skips the terminal bell character
+// and filters cursor hide/show codes that cause window flashing
 type bellSkipper struct{}
 
 func (bs *bellSkipper) Write(b []byte) (int, error) {
@@ -19,6 +20,14 @@ func (bs *bellSkipper) Write(b []byte) (int, error) {
 	if len(b) == 1 && b[0] == charBell {
 		return 0, nil
 	}
+	
+	// Filter out cursor hide/show escape codes that cause flashing
+	// \033[?25l (hide cursor) and \033[?25h (show cursor)
+	s := string(b)
+	if strings.Contains(s, "\033[?25l") || strings.Contains(s, "\033[?25h") {
+		return len(b), nil // Pretend we wrote it, but skip it
+	}
+	
 	return os.Stderr.Write(b)
 }
 
