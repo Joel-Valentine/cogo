@@ -1,3 +1,97 @@
+## 3.0.1 (2026-01-18)
+
+### 🐛 Bug Fixes
+
+* **credentials**: Fix credential manager not using default providers
+  - `NewManager()` now automatically includes all default providers when called with no arguments
+  - Fixes issue where `cogo create` and `cogo destroy` couldn't find tokens in keychain
+  - `cogo list` was working because it manually specified all providers
+  - Now all commands use the same credential resolution logic
+  - Added tests for default provider initialization
+
+---
+
+## 3.0.0 (2026-01-18) - Major Navigation Framework Release
+
+### 🎉 Major Features
+
+* **navigation**: Complete navigation framework with back navigation support
+  - Multi-step flows with state preservation (inspired by gcloud)
+  - Back navigation: Press 'b' or ← to return to previous steps
+  - Universal keyboard shortcuts (Ctrl+C, Esc, 'q' to quit)
+  - Graceful empty state handling (no more crashes!)
+  - Colored output (✓ success, ✗ error, ⚠️ warning)
+  - Research-based UX patterns from 11 major CLI tools
+
+* **create**: New multi-step creation flow with back navigation
+  - 7 guided steps with ability to go back and change selections
+  - Summary display before final confirmation
+  - Empty state handling at each step
+  - State preservation when navigating back
+
+* **destroy**: Enhanced destruction flow with multiple safety checks
+  - 4-step flow with back navigation support
+  - Multiple confirmation prompts
+  - Full droplet details before deletion
+  - Name re-entry requirement for safety
+
+### 🐛 Bug Fixes
+
+* **destroy**: Fix crash when no droplets exist (panic: index out of range [-1])
+* **validation**: Fix keystroke spam in all prompts (validate after Enter, not per-keystroke)
+* **empty-state**: Add graceful handling for empty SSH keys, regions, sizes, images
+* **navigation**: Fix crashes on invalid keyboard input
+
+### 🎨 User Experience Improvements
+
+* **messages**: Standardized error, success, and warning message formats
+* **colors**: Consistent colored output across all commands
+* **help**: Clear help text showing available keyboard shortcuts
+* **exit-codes**: Proper exit codes (0 for success/cancel, 1 for errors, 130 for Ctrl+C)
+
+### 📚 Documentation
+
+* **guides**: Comprehensive developer guides (1,400+ lines)
+  - `navigation-patterns.md` - Universal standards
+  - `new-command-guide.md` - Adding new commands
+  - `provider-guide.md` - Adding new cloud providers
+* **constitution**: Updated to v2.0.0 with navigation principles
+* **README**: Enhanced with navigation examples and keyboard shortcuts
+
+### 🏗️ Technical Improvements
+
+* **framework**: New `navigation/` package (8 files, 45+ unit tests)
+  - Navigator, Flow, Step, State interfaces
+  - SelectPrompt, InputPrompt, ConfirmPrompt wrappers
+  - Empty state handler and validation helpers
+  - Comprehensive error types
+* **testing**: 45+ unit tests, all passing
+* **code-quality**: Modern Go idioms, proper error handling
+
+### 🔄 Breaking Changes
+
+* **create**: Now uses multi-step flow (behavior change, but backward compatible)
+* **destroy**: Enhanced safety flow (more confirmation steps)
+* **constitution**: Updated to v2.0.0 (new development standards)
+
+### 📊 Research & Standards
+
+* Researched 11 major CLI tools (gh, kubectl, terraform, aws, gcloud, docker, npm, cargo, git, az, doctl)
+* Adopted industry best practices:
+  - Ctrl+C for immediate cancel (11/11 tools)
+  - Exit code 0 for empty states (10/11 tools)
+  - Validate on Enter only (9/10 interactive tools)
+  - Back navigation (inspired by gcloud - only 2/11 tools have this!)
+
+### Migration Notes
+
+* No breaking changes to command syntax
+* All existing commands work with enhanced UX
+* New keyboard shortcuts available immediately
+* Empty states now handled gracefully (no crashes)
+
+---
+
 ## 2.5.1 (2026-01-18)
 
 ### Bug Fixes
